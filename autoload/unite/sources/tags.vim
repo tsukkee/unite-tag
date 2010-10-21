@@ -42,15 +42,18 @@ function! unite#sources#tags#_get_last_tagfiles()
 endfunction
 
 
-" tags
+" source
 let s:source = {
 \   'name': 'tags',
-\   'max_candidates': 30
+\   'max_candidates': 30,
+\   'action_table': {}
 \}
 function! s:source.gather_candidates(args, context)
     " parsing tag files is faster than using taglist()
     let result = []
     for tagfile in s:last_tagfiles
+        let basedir = fnamemodify(tagfile, ':p:h')
+
         for line in readfile(tagfile)
             let tokens = split(line, "\t")
             if len(tokens) > 4
@@ -61,9 +64,9 @@ function! s:source.gather_candidates(args, context)
                 " if not comment line
                 if stridx(name, "!") != 0
                     call add(result, {
-                    \   'word':   filename,
-                    \   'abbr':   printf('[tags] %s @%s', name, filename),
-                    \   'kind':   'tag',
+                    \   'word':   basedir . '/' . filename,
+                    \   'abbr':   printf('[tags] %s @%s', name, fnamemodify(basedir . '/' . filename, ':.')),
+                    \   'kind':   'jump_list',
                     \   'source': 'tags',
                     \   'line':    linenr,
                     \   'pattern': cmd,
@@ -76,3 +79,29 @@ function! s:source.gather_candidates(args, context)
 
     return result
 endfunction
+
+" action
+let s:action_table = {}
+
+let s:action_table.jump = {
+\   'is_selectable': 1
+\}
+function! s:action_table.jump.func(candidate)
+    execute "tjump" a:candidate.tagname
+endfunction
+
+let s:action_table.select = {
+\   'is_selectable': 1
+\}
+function! s:action_table.select.func(candidate)
+    execute "tselect" a:candidate.tagname
+endfunction
+
+let s:action_table.jsplit = {
+\   'is_selectable': 1
+\}
+function! s:action_table.jsplit.func(candidate)
+    execute "stjump" a:candidate.tagname
+endfunction
+
+let s:source.action_table.jump_list = s:action_table
