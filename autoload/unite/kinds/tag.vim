@@ -28,39 +28,31 @@ function! unite#kinds#tag#define()
 endfunction
 
 let s:kind = {
-\    'name' : 'tag',
-\    'default_action' : 'lookup',
+\    'name': 'tag',
+\    'default_action': 'open',
 \    'action_table': {},
 \}
-
-let s:kind.action_table = deepcopy(unite#kinds#word#define().action_table)
-
-let s:kind.action_table.lookup = {
-\   'is_selectable': 1
-\}
-function! s:kind.action_table.lookup.func(candidate)
-    execute "tag" a:candidate.word
-endfunction
+let s:kind.action_table = deepcopy(unite#kinds#jump_list#define().action_table)
 
 let s:kind.action_table.jump = {
 \   'is_selectable': 1
 \}
 function! s:kind.action_table.jump.func(candidate)
-    execute "tjump" a:candidate.word
+    execute "tjump" a:candidate.tagname
 endfunction
 
 let s:kind.action_table.select = {
 \   'is_selectable': 1
 \}
 function! s:kind.action_table.select.func(candidate)
-    execute "tselect" a:candidate.word
+    execute "tselect" a:candidate.tagname
 endfunction
 
 let s:kind.action_table.split = {
 \   'is_selectable': 1
 \}
 function! s:kind.action_table.split.func(candidate)
-    execute "stjump" a:candidate.word
+    execute "stjump" a:candidate.tagname
 endfunction
 
 let s:kind.action_table.preview = {
@@ -68,5 +60,5 @@ let s:kind.action_table.preview = {
 \   'is_quit': 0
 \}
 function! s:kind.action_table.preview.func(candidate)
-    execute "ptjump" a:candidate.word
+    execute "ptjump" a:candidate.tagname
 endfunction

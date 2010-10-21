@@ -1,4 +1,4 @@
-" tags, tags/help sources for unite.vim
+" tags source for unite.vim
 " Version:     0.0.1
 " Last Change: 21 Oct 2010
 " Author:      tsukkee <takayuki0510 at gmail.com>
@@ -24,7 +24,7 @@
 
 " define source
 function! unite#sources#tags#define()
-    return [s:source_tags, s:source_tags_help]
+    return s:source
 endfunction
 
 
@@ -43,95 +43,36 @@ endfunction
 
 
 " tags
-let s:source_tags = {
+let s:source = {
 \   'name': 'tags',
 \   'max_candidates': 30
 \}
-function! s:source_tags.gather_candidates(args, candidate)
-    return s:gather_candidates(0, a:args, a:candidate)
-endfunction
-
-
-" tags/help
-let s:source_tags_help = {
-\   'name': 'tags/help',
-\   'max_candidates': 30,
-\   'action_table': {},
-\   'default_action': {'word': 'lookup'}
-\}
-function! s:source_tags_help.gather_candidates(args, candidate)
-    return s:gather_candidates(1, a:args, a:candidate)
-endfunction
-
-let s:action_table_tags_help = {}
-let s:action_table_tags_help.lookup = {
-\   'is_selectable': 1
-\}
-function! s:action_table_tags_help.lookup.func(candidate)
-    execute "help" a:candidate.word
-endfunction
-
-let s:source_tags_help.action_table.word = s:action_table_tags_help
-
-
-" gather
-function! s:gather_candidates(is_help, args, context)
-    let saved_buftype = &l:buftype
-    if a:is_help
-        let &l:buftype = "help"
-    endif
-
-    let abbr_prefix = a:is_help ? '[help] '   : '[tag] '
-    let source_kind = a:is_help ? 'word'      : 'tag'
-    let source_name = a:is_help ? 'tags/help' : 'tags'
-
+function! s:source.gather_candidates(args, context)
+    " parsing tag files is faster than using taglist()
     let result = []
-
-    " parsing tagfiles() is faster than using taglist()
-    for tagfile in s:unique(tagfiles())
+    for tagfile in s:last_tagfiles
         for line in readfile(tagfile)
-            let [word, file] = split(line, "\t")[0:1]
-            if stridx(word, "!") != 0
-                call add(result, {
-                \   'word': word,
-                \   'abbr': abbr_prefix . word . (a:is_help ? '' : ' @' . file),
-                \   'kind': source_kind,
-                \   'source': source_name,
-                \   'is_insert': a:context.is_insert
-                \})
+            let tokens = split(line, "\t")
+            if len(tokens) > 4
+                let [name, filename, cmd, kind, linenr] = tokens[0:4]
+                " ex) line:123 -> 123
+                let linenr = linenr[5:]
+
+                " if not comment line
+                if stridx(name, "!") != 0
+                    call add(result, {
+                    \   'word':   filename,
+                    \   'abbr':   printf('[tags] %s @%s', name, filename),
+                    \   'kind':   'tag',
+                    \   'source': 'tags',
+                    \   'line':    linenr,
+                    \   'pattern': cmd,
+                    \   'tagname': name
+                    \})
+                endif
             endif
         endfor
     endfor
-    " this is accurate but slow
-    " for t in taglist('.')
-        " call add(result, {
-        " \   'word': t.name,
-        " \   'abbr': abbr_prefix . t.name . (a:is_help ? '' : ' @' . t.filename),
-        " \   'kind': source_kind,
-        " \   'source': source_name,
-        " \   'is_insert': a:context.is_insert
-        " \})
-    " endfor
-
-    let &l:buftype = saved_buftype
 
     return result
 endfunction
-
-
-" unique
-function! s:unique(array)
-    if len(a:array) <= 1
-        return a:array
-    endif
-
-    let sorted = sort(a:array)
-    let result = [sorted[0]]
-    for item in sorted
-        if item != result[-1]
-            call add(result, item)
-        endif
-    endfor
-    return result
-endfunction
-
