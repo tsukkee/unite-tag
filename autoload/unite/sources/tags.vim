@@ -28,6 +28,20 @@ function! unite#sources#tags#define()
 endfunction
 
 
+" save tag files
+let s:last_tagfiles = []
+function! unite#sources#tags#_save_last_tagfiles()
+    if &filetype != 'unite'
+        let s:last_tagfiles = tagfiles()
+    endif
+endfunction
+
+" for debug
+function! unite#sources#tags#_get_last_tagfiles()
+    return s:last_tagfiles
+endfunction
+
+
 " tags
 let s:source_tags = {
 \   'name': 'tags',
