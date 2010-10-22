@@ -28,7 +28,7 @@ endif
 
 augroup plugin-unite-source-tags
     autocmd!
-    autocmd BufLeave * call unite#sources#tags#_save_last_tagfiles()
+    autocmd BufLeave * call unite#sources#tags#_save_last_taglist()
 augroup END
 
 let g:loaded_unite_source_tags = 1

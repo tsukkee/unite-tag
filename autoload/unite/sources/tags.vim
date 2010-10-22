@@ -28,17 +28,17 @@ function! unite#sources#tags#define()
 endfunction
 
 
-" save tag files
-let s:last_tagfiles = []
-function! unite#sources#tags#_save_last_tagfiles()
+" save taglist
+let s:last_taglist = []
+function! unite#sources#tags#_save_last_taglist()
     if &filetype != 'unite'
-        let s:last_tagfiles = tagfiles()
+        let s:last_taglist = taglist('.')
     endif
 endfunction
 
 " for debug
 function! unite#sources#tags#_get_last_tagfiles()
-    return s:last_tagfiles
+    return s:last_taglist
 endfunction
 
 
@@ -51,95 +51,40 @@ let s:source = {
 function! s:source.gather_candidates(args, context)
     " parsing tag files is faster than using taglist()
     let result = []
-    for tagfile in s:last_tagfiles
-        let basedir = fnamemodify(tagfile, ':p:h')
 
-        for line in readfile(tagfile)
-            let [name, filename, pattern, extensions] = s:parse_tag_line(line)
+    for t in s:last_taglist
+        " remove /^ at the head and $/ at the end
+        let pattern = substitute(substitute(t.cmd, '^\/\^\?', '', ''), '\$\?\/$', '', '')
+        " unescape /
+        let pattern = substitute(pattern, '\\\/', '/', 'g')
 
-            " check comment line
-            if empty(name)
-                continue
-            endif
+        " linenr
+        let linenr = ""
+        if pattern =~ '^\d\+$'
+            let linenr = pattern
+            let pattern = ''
+        elseif has_key(t, 'line')
+            let linenr = t.line
+            let pattern = ''
+        endif
 
-            let linenr = ""
-            " when pattern shows line number
-            if pattern =~ '^\d\+$'
-                let linenr = pattern
-                let pattern = ''
-            " search extension_fields including linenr
-            else
-                for ext in extensions
-                    if stridx(ext, 'line:') == 0
-                        let linenr = ext[5:]
-                        let pattern = ''
-                        break
-                    endif
-                endfor
-            endif
-
-            let pattern_str = !empty(pattern) ? ' pat:[' . pattern . ']' : ''
-            let linenr_str = !empty(linenr) ? ' line:' . linenr : ''
-            call add(result, {
-            \   'word':    basedir . '/' . filename,
-            \   'abbr':    printf('[tags] %s%s%s @%s',
-            \        name, pattern_str, linenr_str, fnamemodify(basedir . '/' . filename, ':.')),
-            \   'kind':    'jump_list',
-            \   'source':  'tags',
-            \   'line':    linenr,
-            \   'pattern': pattern,
-            \   'tagname': name
-            \})
-        endfor
+        let pattern_str = !empty(pattern) ? ' pat:[' . pattern . ']' : ''
+        let linenr_str = !empty(linenr) ? ' line:' . linenr : ''
+        call add(result, {
+        \   'word':    t.filename,
+        \   'abbr':    printf('[tags] %s%s%s @%s',
+        \        t.name, pattern_str, linenr_str, t.filename),
+        \   'kind':    'jump_list',
+        \   'source':  'tags',
+        \   'line':    linenr,
+        \   'pattern': pattern,
+        \   'tagname': t.name
+        \})
     endfor
 
     return result
 endfunction
 
-
-" Tag file format
-"   tag_name<TAB>file_name<TAB>ex_cmd;"<TAB>extension_fields
-" Parse
-" 0. a line starting with ! is comment line
-" 1. split extension_fields and others by separating the string at the last ;"
-" 2. parse the former half by spliting it by <TAB>
-" 3. the first part is tag_name, the second part is file_name
-"    and ex_cmd is taken by joining remain parts with <TAB>
-" 4. parsing extension_fields
-function! s:parse_tag_line(line)
-    " 0.
-    if stridx(a:line, '!') == 0
-        return ['', '', '', []]
-    endif
-
-    " 1.
-    let tokens = split(a:line, ';"')
-    let former = join(tokens[0:-2], ';"')
-    let extensions = split(tokens[-1], "\t")
-
-    " 2.
-    let fields = split(former, "\t")
-
-    " 3.
-    let name = remove(fields, 0)
-    let file = remove(fields, 0)
-    let cmd = join(fields, "\t")
-
-    " remove /^ at the head and $/ at the end
-    let pattern = substitute(substitute(cmd, '^\/\^\?', '', ''), '\$\?\/$', '', '')
-    " unescape /
-    let pattern = substitute(pattern, '\\\/', '/', 'g')
-
-    " 4. TODO
-
-    return [name, file, pattern, extensions]
-endfunction
-
-" " test case
-" let s:test = 'Hoge	test.php	/^function Hoge()\/*$\/;"	f	test:*\/ {$/;"	f'
-" echomsg string(s:parse_tag_line(s:test))
-" let s:test = 'Hoge	Hoge/Fuga.php	/^class Hoge$/;"	c	line:15'
-" echomsg string(s:parse_tag_line(s:test))
 
 " action
 let s:action_table = {}
