@@ -64,22 +64,26 @@ function! s:source.gather_candidates(args, context)
 
             let linenr = ""
             " when pattern shows line number
-            if pattern =~ '\d+'
+            if pattern =~ '^\d\+$'
                 let linenr = pattern
+                let pattern = ''
             " search extension_fields including linenr
             else
                 for ext in extensions
-                    if stridx(linenr, 'line:') == 0
-                        linenr = str2nr(ext[5:])
+                    if stridx(ext, 'line:') == 0
+                        let linenr = ext[5:]
+                        let pattern = ''
                         break
                     endif
                 endfor
             endif
 
+            let pattern_str = !empty(pattern) ? ' pat:[' . pattern . ']' : ''
+            let linenr_str = !empty(linenr) ? ' line:' . linenr : ''
             call add(result, {
             \   'word':    basedir . '/' . filename,
-            \   'abbr':    printf('[tags] %s pat:[%s] line: %s @%s',
-            \        name, pattern, linenr, fnamemodify(basedir . '/' . filename, ':.')),
+            \   'abbr':    printf('[tags] %s%s%s @%s',
+            \        name, pattern_str, linenr_str, fnamemodify(basedir . '/' . filename, ':.')),
             \   'kind':    'jump_list',
             \   'source':  'tags',
             \   'line':    linenr,
@@ -132,8 +136,10 @@ function! s:parse_tag_line(line)
 endfunction
 
 " " test case
-" let test = 'Hoge	test.php	/^function Hoge()\/*$\/;"	f	test:*\/ {$/;"	f'
-" echomsg string(s:parse_tag_line(test))
+" let s:test = 'Hoge	test.php	/^function Hoge()\/*$\/;"	f	test:*\/ {$/;"	f'
+" echomsg string(s:parse_tag_line(s:test))
+" let s:test = 'Hoge	Hoge/Fuga.php	/^class Hoge$/;"	c	line:15'
+" echomsg string(s:parse_tag_line(s:test))
 
 " action
 let s:action_table = {}
