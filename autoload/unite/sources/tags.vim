@@ -129,6 +129,8 @@ function! s:parse_tag_line(line)
     let pattern = substitute(substitute(cmd, '^\/\^\?', '', ''), '\$\?\/$', '', '')
     " unescape /
     let pattern = substitute(pattern, '\\\/', '/', 'g')
+    " escape regexp characters
+    let pattern = substitute(pattern, '[\[\]$*^~\/]', '\\\\\0', 'g')
 
     " 4. TODO
 
