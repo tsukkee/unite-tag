@@ -86,9 +86,10 @@ function! s:source.gather_candidates(args, context)
             \        name, pattern_str, linenr_str, fnamemodify(basedir . '/' . filename, ':.')),
             \   'kind':    'jump_list',
             \   'source':  'tags',
-            \   'line':    linenr,
-            \   'pattern': pattern,
-            \   'tagname': name
+            \   'action__path':    basedir . '/' . filename,
+            \   'action__line':    linenr,
+            \   'action__pattern': pattern,
+            \   'action__tagname': name
             \})
         endfor
     endfor
@@ -119,6 +120,9 @@ function! s:parse_tag_line(line)
 
     " 2.
     let fields = split(former, "\t")
+    if len(fields) < 3
+        return ['', '', '', []]
+    endif
 
     " 3.
     let name = remove(fields, 0)
@@ -147,24 +151,26 @@ endfunction
 let s:action_table = {}
 
 let s:action_table.jump = {
-\   'is_selectable': 1
+\   'is_selectable': 0
 \}
 function! s:action_table.jump.func(candidate)
-    execute "tjump" a:candidate.tagname
+    execute "tjump" a:candidate.action__tagname
 endfunction
 
 let s:action_table.select = {
-\   'is_selectable': 1
+\   'is_selectable': 0
 \}
 function! s:action_table.select.func(candidate)
-    execute "tselect" a:candidate.tagname
+    execute "tselect" a:candidate.action__tagname
 endfunction
 
 let s:action_table.jsplit = {
 \   'is_selectable': 1
 \}
-function! s:action_table.jsplit.func(candidate)
-    execute "stjump" a:candidate.tagname
+function! s:action_table.jsplit.func(candidates)
+    for c in a:candidates
+        execute "stjump" c.action__tagname
+    endfor
 endfunction
 
 let s:source.action_table.jump_list = s:action_table
