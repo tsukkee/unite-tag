@@ -151,20 +151,21 @@ endfunction
 let s:action_table = {}
 
 let s:action_table.jump = {
-\   'is_selectable': 0
+\   'description': 'jump to the tag'
 \}
 function! s:action_table.jump.func(candidate)
     execute "tjump" a:candidate.action__tagname
 endfunction
 
 let s:action_table.select = {
-\   'is_selectable': 0
+\   'description': 'select candidates from the tag pattern'
 \}
 function! s:action_table.select.func(candidate)
     execute "tselect" a:candidate.action__tagname
 endfunction
 
 let s:action_table.jsplit = {
+\   'description': 'split window and jump to the tag'
 \   'is_selectable': 1
 \}
 function! s:action_table.jsplit.func(candidates)
