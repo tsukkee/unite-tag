@@ -165,7 +165,7 @@ function! s:action_table.select.func(candidate)
 endfunction
 
 let s:action_table.jsplit = {
-\   'description': 'split window and jump to the tag'
+\   'description': 'split window and jump to the tag',
 \   'is_selectable': 1
 \}
 function! s:action_table.jsplit.func(candidates)
