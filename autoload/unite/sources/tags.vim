@@ -1,6 +1,6 @@
 " tags source for unite.vim
-" Version:     0.0.1
-" Last Change: 21 Oct 2010
+" Version:     0.0.2
+" Last Change: 8 Nov 2010
 " Author:      tsukkee <takayuki0510 at gmail.com>
 " Licence:     The MIT License {{{
 "     Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -81,7 +81,7 @@ function! s:source.gather_candidates(args, context)
             let pattern_str = !empty(pattern) ? ' pat:[' . pattern . ']' : ''
             let linenr_str = !empty(linenr) ? ' line:' . linenr : ''
             call add(result, {
-            \   'word':    basedir . '/' . filename,
+            \   'word':    name,
             \   'abbr':    printf('[tags] %s%s%s @%s',
             \        name, pattern_str, linenr_str, fnamemodify(basedir . '/' . filename, ':.')),
             \   'kind':    'jump_list',
