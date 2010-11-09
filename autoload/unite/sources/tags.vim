@@ -1,6 +1,6 @@
 " tags source for unite.vim
 " Version:     0.0.2
-" Last Change: 8 Nov 2010
+" Last Change: 9 Nov 2010
 " Author:      tsukkee <takayuki0510 at gmail.com>
 " Licence:     The MIT License {{{
 "     Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -52,8 +52,9 @@ function! s:source.gather_candidates(args, context)
     " parsing tag files is faster than using taglist()
     let result = []
     for tagfile in s:last_tagfiles
-        let basedir = fnamemodify(tagfile, ':p:h')
+        if !filereadable(tagfile) | continue | endif
 
+        let basedir = fnamemodify(tagfile, ':p:h')
         for line in readfile(tagfile)
             let [name, filename, pattern, extensions] = s:parse_tag_line(line)
 
@@ -78,12 +79,13 @@ function! s:source.gather_candidates(args, context)
                 endfor
             endif
 
-            let pattern_str = !empty(pattern) ? ' pat:[' . pattern . ']' : ''
-            let linenr_str = !empty(linenr) ? ' line:' . linenr : ''
             call add(result, {
             \   'word':    name,
-            \   'abbr':    printf('[tags] %s%s%s @%s',
-            \        name, pattern_str, linenr_str, fnamemodify(basedir . '/' . filename, ':.')),
+            \   'abbr':    printf('%s @%s %s%s',
+            \                  name,
+            \                  fnamemodify(basedir . '/' . filename, ':.'),
+            \                  !empty(pattern) ? ' pat:/' . pattern . '/' : '',
+            \                  !empty(linenr)  ? ' line:' . linenr : ''),
             \   'kind':    'jump_list',
             \   'source':  'tags',
             \   'action__path':    basedir . '/' . filename,
