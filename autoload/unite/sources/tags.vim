@@ -28,26 +28,19 @@ function! unite#sources#tags#define()
 endfunction
 
 
-" save tag files
-let s:last_tagfiles = []
-function! unite#sources#tags#_save_last_tagfiles()
-    if &filetype != 'unite'
-        let s:last_tagfiles = tagfiles()
-    endif
-endfunction
-
-" for debug
-function! unite#sources#tags#_get_last_tagfiles()
-    return s:last_tagfiles
-endfunction
-
-
 " source
 let s:source = {
 \   'name': 'tags',
 \   'max_candidates': 30,
 \   'action_table': {}
 \}
+
+function! s:source.on_init(args, context)
+    wincmd p
+    let s:last_tagfiles = tagfiles()
+    wincmd p
+endfunction
+
 function! s:source.gather_candidates(args, context)
     " parsing tag files is faster than using taglist()
     let result = []
@@ -63,20 +56,11 @@ function! s:source.gather_candidates(args, context)
                 continue
             endif
 
-            let linenr = ""
             " when pattern shows line number
+            let linenr = ""
             if pattern =~ '^\d\+$'
                 let linenr = pattern
                 let pattern = ''
-            " search extension_fields including linenr
-            else
-                for ext in extensions
-                    if stridx(ext, 'line:') == 0
-                        let linenr = ext[5:]
-                        let pattern = ''
-                        break
-                    endif
-                endfor
             endif
 
             call add(result, {
@@ -136,38 +120,38 @@ function! s:parse_tag_line(line)
     " unescape /
     let pattern = substitute(pattern, '\\\/', '/', 'g')
     " escape regexp characters
-    let pattern = substitute(pattern, '[\[\]$*^~\/]', '\\\\\0', 'g')
+    let pattern = substitute(pattern, '[\[\]$*^~\/]', '\\\0', 'g')
 
     " 4. TODO
 
     return [name, file, pattern, extensions]
 endfunction
-
 " " test case
 " let s:test = 'Hoge	test.php	/^function Hoge()\/*$\/;"	f	test:*\/ {$/;"	f'
 " echomsg string(s:parse_tag_line(s:test))
 " let s:test = 'Hoge	Hoge/Fuga.php	/^class Hoge$/;"	c	line:15'
 " echomsg string(s:parse_tag_line(s:test))
 
+
 " action
 let s:action_table = {}
 
 let s:action_table.jump = {
-\   'description': 'jump to the tag'
+\   'description': 'jump to the selected tag'
 \}
 function! s:action_table.jump.func(candidate)
     execute "tjump" a:candidate.action__tagname
 endfunction
 
 let s:action_table.select = {
-\   'description': 'select candidates from the tag pattern'
+\   'description': 'list the tags matching the selected tag pattern'
 \}
 function! s:action_table.select.func(candidate)
     execute "tselect" a:candidate.action__tagname
 endfunction
 
 let s:action_table.jsplit = {
-\   'description': 'split window and jump to the tag',
+\   'description': 'split window and jump to the selected tag',
 \   'is_selectable': 1
 \}
 function! s:action_table.jsplit.func(candidates)
