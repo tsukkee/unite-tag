@@ -36,9 +36,7 @@ let s:source = {
 \}
 
 function! s:source.on_init(args, context)
-    wincmd p
     let s:last_tagfiles = tagfiles()
-    wincmd p
 endfunction
 
 function! s:source.gather_candidates(args, context)
