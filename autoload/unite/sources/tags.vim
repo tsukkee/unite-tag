@@ -32,10 +32,11 @@ endfunction
 let s:source = {
 \   'name': 'tags',
 \   'max_candidates': 30,
-\   'action_table': {}
+\   'action_table': {},
+\   'hooks': {}
 \}
 
-function! s:source.on_init(args, context)
+function! s:source.hooks.on_init(args, context)
     let s:last_tagfiles = tagfiles()
 endfunction
 
