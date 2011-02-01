@@ -93,16 +93,19 @@ function! s:create_tags(tagfile)  " {{{2
             let pattern = ''
         endif
 
+        " FIXME: It works only on Unix.
+        let path = filename =~ '^/' ? filename : basedir . '/' . filename
+
         call add(tags, {
         \   'word':    name,
         \   'abbr':    printf('%s @%s %s%s',
         \                  name,
-        \                  fnamemodify(basedir . '/' . filename, ':.'),
+        \                  fnamemodify(path, ':.'),
         \                  !empty(pattern) ? ' pat:/' . pattern . '/' : '',
         \                  !empty(linenr)  ? ' line:' . linenr : ''),
         \   'kind':    'jump_list',
         \   'source':  'tags',
-        \   'action__path':    basedir . '/' . filename,
+        \   'action__path':    path,
         \   'action__line':    linenr,
         \   'action__pattern': pattern,
         \   'action__tagname': name
