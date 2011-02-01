@@ -64,7 +64,7 @@ function! s:source.gather_candidates(args, context)
 endfunction
 
 
-function! s:get_tags(tagfile)  " {{{2
+function! s:get_tags(tagfile)
     let tagfile = fnamemodify(a:tagfile, ':p')
     if !filereadable(tagfile)
         return []
@@ -75,7 +75,7 @@ function! s:get_tags(tagfile)  " {{{2
     return s:cache[tagfile].tags
 endfunction
 
-function! s:create_tags(tagfile)  " {{{2
+function! s:create_tags(tagfile)
     let tags = []
     let basedir = fnamemodify(a:tagfile, ':p:h')
     for line in readfile(a:tagfile)
