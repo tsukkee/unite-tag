@@ -50,6 +50,16 @@ function! s:source.gather_candidates(args, context)
         let result += s:get_tags(tagfile)
     endfor
 
+    if !empty(a:args)
+        let arg = a:args[0]
+        if arg == '/'
+            let pat = arg[1 : ]
+            call filter(result, 'v:val.word =~? pat')
+        else
+            call filter(result, 'v:val.word == arg')
+        endif
+    endif
+
     return result
 endfunction
 
