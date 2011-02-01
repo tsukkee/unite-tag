@@ -78,11 +78,18 @@ endfunction
 function! s:create_tags(tagfile)
     let tags = []
     let basedir = fnamemodify(a:tagfile, ':p:h')
+    let encoding = ''
     for line in readfile(a:tagfile)
+        if encoding != ''
+            let line = iconv(line, encoding, &encoding)
+        endif
         let [name, filename, pattern, extensions] = s:parse_tag_line(line)
 
         " check comment line
         if empty(name)
+            if filename != ''
+                let encoding = filename
+            endif
             continue
         endif
 
@@ -130,7 +137,8 @@ endfunction
 function! s:parse_tag_line(line)
     " 0.
     if stridx(a:line, '!') == 0
-        return ['', '', '', []]
+       let enc = matchstr(a:line, '\C^!_TAG_FILE_ENCODING\t\zs\S\+\ze\t')
+        return ['', enc, '', []]
     endif
 
     " 1.
