@@ -28,6 +28,9 @@ function! unite#sources#tags#define()
 endfunction
 
 
+" cache
+let s:cache = {}
+
 " source
 let s:source = {
 \   'name': 'tags',
@@ -44,44 +47,63 @@ function! s:source.gather_candidates(args, context)
     " parsing tag files is faster than using taglist()
     let result = []
     for tagfile in s:last_tagfiles
-        if !filereadable(tagfile) | continue | endif
-
-        let basedir = fnamemodify(tagfile, ':p:h')
-        for line in readfile(tagfile)
-            let [name, filename, pattern, extensions] = s:parse_tag_line(line)
-
-            " check comment line
-            if empty(name)
-                continue
-            endif
-
-            " when pattern shows line number
-            let linenr = ""
-            if pattern =~ '^\d\+$'
-                let linenr = pattern
-                let pattern = ''
-            endif
-
-            call add(result, {
-            \   'word':    name,
-            \   'abbr':    printf('%s @%s %s%s',
-            \                  name,
-            \                  fnamemodify(basedir . '/' . filename, ':.'),
-            \                  !empty(pattern) ? ' pat:/' . pattern . '/' : '',
-            \                  !empty(linenr)  ? ' line:' . linenr : ''),
-            \   'kind':    'jump_list',
-            \   'source':  'tags',
-            \   'action__path':    basedir . '/' . filename,
-            \   'action__line':    linenr,
-            \   'action__pattern': pattern,
-            \   'action__tagname': name
-            \})
-        endfor
+        let result += s:get_tags(tagfile)
     endfor
 
     return result
 endfunction
 
+
+function! s:get_tags(tagfile)  " {{{2
+    let tagfile = fnamemodify(a:tagfile, ':p')
+    if !filereadable(tagfile)
+        return []
+    endif
+    if !has_key(s:cache, tagfile) || s:cache[tagfile].time != getftime(tagfile)
+        let s:cache[tagfile] = s:create_tags(tagfile)
+    endif
+    return s:cache[tagfile].tags
+endfunction
+
+function! s:create_tags(tagfile)  " {{{2
+    let tags = []
+    let basedir = fnamemodify(a:tagfile, ':p:h')
+    for line in readfile(a:tagfile)
+        let [name, filename, pattern, extensions] = s:parse_tag_line(line)
+
+        " check comment line
+        if empty(name)
+            continue
+        endif
+
+        " when pattern shows line number
+        let linenr = ""
+        if pattern =~ '^\d\+$'
+            let linenr = pattern
+            let pattern = ''
+        endif
+
+        call add(tags, {
+        \   'word':    name,
+        \   'abbr':    printf('%s @%s %s%s',
+        \                  name,
+        \                  fnamemodify(basedir . '/' . filename, ':.'),
+        \                  !empty(pattern) ? ' pat:/' . pattern . '/' : '',
+        \                  !empty(linenr)  ? ' line:' . linenr : ''),
+        \   'kind':    'jump_list',
+        \   'source':  'tags',
+        \   'action__path':    basedir . '/' . filename,
+        \   'action__line':    linenr,
+        \   'action__pattern': pattern,
+        \   'action__tagname': name
+        \})
+    endfor
+
+    return {
+    \   'time': getftime(a:tagfile),
+    \   'tags': tags,
+    \}
+endfunction
 
 " Tag file format
 "   tag_name<TAB>file_name<TAB>ex_cmd;"<TAB>extension_fields
