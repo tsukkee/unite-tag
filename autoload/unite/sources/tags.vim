@@ -24,7 +24,7 @@
 
 " define source
 function! unite#sources#tags#define()
-    return s:source
+    return [s:source, s:source_files]
 endfunction
 
 
@@ -63,8 +63,32 @@ function! s:source.gather_candidates(args, context)
     return result
 endfunction
 
+" source tags/file
+let s:source_files = {
+\   'name': 'tags/file',
+\   'max_candidates': 30,
+\   'action_table': {},
+\   'hooks': {'on_init': s:source.hooks.on_init}
+\}
 
-function! s:get_tags(tagfile)
+function! s:source_files.gather_candidates(args, context)
+    let files = {}
+    for tagfile in s:last_tagfiles
+        call extend(files, s:get_tags(tagfile, 'files'))
+    endfor
+
+    return map(sort(keys(files)), '{
+    \   "word": v:val,
+    \   "abbr": fnamemodify(v:val, ":."),
+    \   "kind": "file",
+    \   "source": "tags/file",
+    \   "action__path": v:val,
+    \   "action__directory": unite#path2directory(v:val),
+    \ }')
+endfunction
+
+
+function! s:get_tags(tagfile, ...)
     let tagfile = fnamemodify(a:tagfile, ':p')
     if !filereadable(tagfile)
         return []
@@ -72,11 +96,12 @@ function! s:get_tags(tagfile)
     if !has_key(s:cache, tagfile) || s:cache[tagfile].time != getftime(tagfile)
         let s:cache[tagfile] = s:create_tags(tagfile)
     endif
-    return s:cache[tagfile].tags
+    return s:cache[tagfile][a:0 ? a:1 : 'tags']
 endfunction
 
 function! s:create_tags(tagfile)
     let tags = []
+    let files = {}
     let basedir = fnamemodify(a:tagfile, ':p:h')
     let encoding = ''
     for line in readfile(a:tagfile)
@@ -102,6 +127,7 @@ function! s:create_tags(tagfile)
 
         " FIXME: It works only on Unix.
         let path = filename =~ '^/' ? filename : basedir . '/' . filename
+        let files[fnamemodify(path, ':p')] = 1
 
         call add(tags, {
         \   'word':    name,
@@ -122,6 +148,7 @@ function! s:create_tags(tagfile)
     return {
     \   'time': getftime(a:tagfile),
     \   'tags': tags,
+    \   'files': files,
     \}
 endfunction
 
