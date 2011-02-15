@@ -1,4 +1,4 @@
-" tags source for unite.vim
+" tag source for unite.vim
 " Version:     0.0.4
 " Last Change: 15 Feb 2011
 " Author:      tsukkee <takayuki0510 at gmail.com>
@@ -24,7 +24,7 @@
 " }}}
 
 " define source
-function! unite#sources#tags#define()
+function! unite#sources#tag#define()
     return [s:source, s:source_files]
 endfunction
 
@@ -34,7 +34,7 @@ let s:cache = {}
 
 " source
 let s:source = {
-\   'name': 'tags',
+\   'name': 'tag',
 \   'max_candidates': 30,
 \   'action_table': {},
 \   'hooks': {}
@@ -68,7 +68,7 @@ function! s:source.async_gather_candidates(args, context)
     let result = []
     let tags = a:context.source__continuation[0]
 
-    let is_file = self.name ==# 'tags/file'
+    let is_file = self.name ==# 'tag/file'
     if has('reltime') && has('float')
         let time = reltime()
         while str2float(reltimestr(reltime(time))) < 0.05
@@ -92,9 +92,9 @@ function! s:source.async_gather_candidates(args, context)
 endfunction
 
 
-" source tags/file
+" source tag/file
 let s:source_files = {
-\   'name': 'tags/file',
+\   'name': 'tag/file',
 \   'max_candidates': 30,
 \   'action_table': {},
 \   'hooks': {'on_init': s:source.hooks.on_init},
@@ -200,7 +200,7 @@ function! s:next(tags, line, is_file)
         \   "word": fullpath,
         \   "abbr": fnamemodify(fullpath, ":."),
         \   "kind": "file",
-        \   "source": "tags/file",
+        \   "source": "tag/file",
         \   "action__path": fullpath,
         \   "action__directory": unite#path2directory(fullpath),
         \ }
