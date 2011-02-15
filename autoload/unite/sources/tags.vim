@@ -153,11 +153,10 @@ endfunction
 
 function! s:next(tags, line, is_file)
     let cont = a:tags.cont
-    if cont.encoding != ''
-        let line = iconv(line, cont.encoding, &encoding)
-    endif
     " parsing tag files is faster than using taglist()
-    let [name, filename, pattern, extensions] = s:parse_tag_line(a:line)
+    let [name, filename, pattern, extensions] = s:parse_tag_line(
+    \    cont.encoding != '' ? iconv(a:line, cont.encoding, &encoding)
+    \                        : a:line)
 
     " check comment line
     if empty(name)
