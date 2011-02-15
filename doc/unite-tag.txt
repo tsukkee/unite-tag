@@ -1,0 +1,68 @@
+*unite-tag.txt* tag source for unite.vim
+
+Version:     0.1.0
+Last Change: 15 Feb 2011
+Author:      tsukkee <takayuki0510 at gmail.com>
+             thinca <thinca+vim@gmail.com>
+Licence:     The MIT License
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    THE SOFTWARE.
+
+
+==============================================================================
+INTRODUCTION						*unite-tag-introduction*
+
+*unite-tag* is a |unite.vim| plugin for selecting |tags| or selecting files
+including |tags|.
+
+Requirement:
+- |unite.vim| (Recommend latest version at https://github.com/Shougo/unite.vim)
+
+Latest version:
+https://github.com/tsukkee/unite-tag
+
+
+==============================================================================
+USAGE							*unite-tag-usage*
+
+To selecting tags, execute |:Unite| with argument of tag
+>
+	:Unite tag
+<
+
+To selecting files including tags, execute |:Unite| with argument of tag/file
+>
+	:Unite tag/file
+<
+
+This plugin does not block vim because tags' information is aggregated
+asynchronously.
+
+
+==============================================================================
+CUSTOMIZE						*unite-tag-customize*
+
+If you want to unit-tag instead of |<C-]>|, try to write below in your vimrc.
+FIXME: this destroies |<C-]>| behaviour in help.
+>
+	nnoremap <C-]> :<C-u>UniteWithCursorWord -immediately tag<CR>
+<
+
+
+==============================================================================
+vim:tw=78:fo=tcq2mM:ts=8:ft=help:norl
