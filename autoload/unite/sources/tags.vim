@@ -44,113 +44,176 @@ function! s:source.hooks.on_init(args, context)
 endfunction
 
 function! s:source.gather_candidates(args, context)
-    " parsing tag files is faster than using taglist()
+    let a:context.source__continuation = []
     let result = []
     for tagfile in s:last_tagfiles
-        let result += s:get_tags(tagfile)
+        let tags = s:get_tags(tagfile)
+        if empty(tags)
+            continue
+        endif
+        let result += tags.tags
+        if has_key(tags, 'cont')
+            call add(a:context.source__continuation, tags)
+        endif
     endfor
 
-    if !empty(a:args)
-        let arg = a:args[0]
-        if arg == '/'
-            let pat = arg[1 : ]
-            call filter(result, 'v:val.word =~? pat')
-        else
-            call filter(result, 'v:val.word == arg')
-        endif
+    return s:pre_filter(result, a:args)
+endfunction
+
+function! s:source.async_gather_candidates(args, context)
+    if empty(a:context.source__continuation)
+        return []
+    endif
+    let result = []
+    let tags = a:context.source__continuation[0]
+
+    let is_file = self.name ==# 'tags/file'
+    if has('reltime') && has('float')
+        let time = reltime()
+        while str2float(reltimestr(reltime(time))) < 0.05
+        \       && !empty(tags.cont.lines)
+            let result += s:next(tags, remove(tags.cont.lines, 0), is_file)
+        endwhile
+    else
+        let i = 100
+        while 0 < i && !empty(tags.cont.lines)
+            let result += s:next(tags, remove(tags.cont.lines, 0), is_file)
+            let i -= 1
+        endwhile
     endif
 
-    return result
+    if empty(tags.cont.lines)
+        call remove(tags, 'cont')
+        call remove(a:context.source__continuation, 0)
+    endif
+
+    return s:pre_filter(result, a:args)
 endfunction
+
 
 " source tags/file
 let s:source_files = {
 \   'name': 'tags/file',
 \   'max_candidates': 30,
 \   'action_table': {},
-\   'hooks': {'on_init': s:source.hooks.on_init}
+\   'hooks': {'on_init': s:source.hooks.on_init},
+\   'async_gather_candidates': s:source.async_gather_candidates,
 \}
 
 function! s:source_files.gather_candidates(args, context)
+    let a:context.source__continuation = []
     let files = {}
     for tagfile in s:last_tagfiles
-        call extend(files, s:get_tags(tagfile, 'files'))
-    endfor
-
-    return map(sort(keys(files)), '{
-    \   "word": v:val,
-    \   "abbr": fnamemodify(v:val, ":."),
-    \   "kind": "file",
-    \   "source": "tags/file",
-    \   "action__path": v:val,
-    \   "action__directory": unite#path2directory(v:val),
-    \ }')
-endfunction
-
-
-function! s:get_tags(tagfile, ...)
-    let tagfile = fnamemodify(a:tagfile, ':p')
-    if !filereadable(tagfile)
-        return []
-    endif
-    if !has_key(s:cache, tagfile) || s:cache[tagfile].time != getftime(tagfile)
-        let s:cache[tagfile] = s:create_tags(tagfile)
-    endif
-    return s:cache[tagfile][a:0 ? a:1 : 'tags']
-endfunction
-
-function! s:create_tags(tagfile)
-    let tags = []
-    let files = {}
-    let basedir = fnamemodify(a:tagfile, ':p:h')
-    let encoding = ''
-    for line in readfile(a:tagfile)
-        if encoding != ''
-            let line = iconv(line, encoding, &encoding)
-        endif
-        let [name, filename, pattern, extensions] = s:parse_tag_line(line)
-
-        " check comment line
-        if empty(name)
-            if filename != ''
-                let encoding = filename
-            endif
+        let tags = s:get_tags(tagfile)
+        if empty(tags)
             continue
         endif
-
-        " when pattern shows line number
-        let linenr = ""
-        if pattern =~ '^\d\+$'
-            let linenr = pattern
-            let pattern = ''
+        call extend(files, tags.files)
+        if has_key(tags, 'cont')
+            call add(a:context.source__continuation, tags)
         endif
-
-        " FIXME: It works only on Unix.
-        let path = filename =~ '^/' ? filename : basedir . '/' . filename
-        let files[fnamemodify(path, ':p')] = 1
-
-        call add(tags, {
-        \   'word':    name,
-        \   'abbr':    printf('%s @%s %s%s',
-        \                  name,
-        \                  fnamemodify(path, ':.'),
-        \                  !empty(pattern) ? ' pat:/' . pattern . '/' : '',
-        \                  !empty(linenr)  ? ' line:' . linenr : ''),
-        \   'kind':    'jump_list',
-        \   'source':  'tags',
-        \   'action__path':    path,
-        \   'action__line':    linenr,
-        \   'action__pattern': pattern,
-        \   'action__tagname': name
-        \})
     endfor
 
-    return {
-    \   'time': getftime(a:tagfile),
-    \   'tags': tags,
-    \   'files': files,
-    \}
+    return map(sort(keys(files)), 'files[v:val]')
 endfunction
+
+
+function! s:pre_filter(result, args)
+    if !empty(a:args)
+        let arg = a:args[0]
+        if arg == '/'
+            let pat = arg[1 : ]
+            call filter(a:result, 'v:val.word =~? pat')
+        else
+            call filter(a:result, 'v:val.word == arg')
+        endif
+    endif
+    return a:result
+endfunction
+
+function! s:get_tags(tagfile)
+    let tagfile = fnamemodify(a:tagfile, ':p')
+    if !filereadable(tagfile)
+        return {}
+    endif
+    if !has_key(s:cache, tagfile) || s:cache[tagfile].time != getftime(tagfile)
+        let s:cache[tagfile] = {
+        \   'time': getftime(tagfile),
+        \   'tags': [],
+        \   'files': {},
+        \   'cont': {
+        \     'lines': readfile(tagfile),
+        \     'basedir': fnamemodify(tagfile, ':p:h'),
+        \     'encoding': '',
+        \   },
+        \}
+    endif
+    return s:cache[tagfile]
+endfunction
+
+function! s:next(tags, line, is_file)
+    let cont = a:tags.cont
+    if cont.encoding != ''
+        let line = iconv(line, cont.encoding, &encoding)
+    endif
+    " parsing tag files is faster than using taglist()
+    let [name, filename, pattern, extensions] = s:parse_tag_line(a:line)
+
+    " check comment line
+    if empty(name)
+        if filename != ''
+            let cont.encoding = filename
+        endif
+        return []
+    endif
+
+    " when pattern shows line number
+    let linenr = ""
+    if pattern =~ '^\d\+$'
+        let linenr = pattern
+        let pattern = ''
+    endif
+
+    " FIXME: It works only on Unix.
+    let path = filename =~ '^/' ? filename : cont.basedir . '/' . filename
+
+    let tag = {
+    \   'word':    name,
+    \   'abbr':    printf('%s @%s %s%s',
+    \                  name,
+    \                  fnamemodify(path, ':.'),
+    \                  !empty(pattern) ? ' pat:/' . pattern . '/' : '',
+    \                  !empty(linenr)  ? ' line:' . linenr : ''),
+    \   'kind':    'jump_list',
+    \   'source':  'tags',
+    \   'action__path':    path,
+    \   'action__line':    linenr,
+    \   'action__pattern': pattern,
+    \   'action__tagname': name
+    \}
+    call add(a:tags.tags, tag)
+
+    let result = a:is_file ? [] : [tag]
+
+    let fullpath = fnamemodify(path, ':p')
+    if !has_key(a:tags.files, fullpath)
+        let file = {
+        \   "word": fullpath,
+        \   "abbr": fnamemodify(fullpath, ":."),
+        \   "kind": "file",
+        \   "source": "tags/file",
+        \   "action__path": fullpath,
+        \   "action__directory": unite#path2directory(fullpath),
+        \ }
+        let a:tags.files[fullpath] = file
+        if a:is_file
+            let result = [file]
+        endif
+    endif
+
+    return result
+endfunction
+
 
 " Tag file format
 "   tag_name<TAB>file_name<TAB>ex_cmd;"<TAB>extension_fields
@@ -164,7 +227,7 @@ endfunction
 function! s:parse_tag_line(line)
     " 0.
     if stridx(a:line, '!') == 0
-       let enc = matchstr(a:line, '\C^!_TAG_FILE_ENCODING\t\zs\S\+\ze\t')
+        let enc = matchstr(a:line, '\C^!_TAG_FILE_ENCODING\t\zs\S\+\ze\t')
         return ['', enc, '', []]
     endif
 
