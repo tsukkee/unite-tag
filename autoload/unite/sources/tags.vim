@@ -1,7 +1,8 @@
 " tags source for unite.vim
-" Version:     0.0.3
-" Last Change: 15 Nov 2010
+" Version:     0.0.4
+" Last Change: 15 Feb 2011
 " Author:      tsukkee <takayuki0510 at gmail.com>
+"              thinca <thinca+vim@gmail.com>
 " Licence:     The MIT License {{{
 "     Permission is hereby granted, free of charge, to any person obtaining a copy
 "     of this software and associated documentation files (the "Software"), to deal
@@ -173,8 +174,7 @@ function! s:next(tags, line, is_file)
         let pattern = ''
     endif
 
-    " FIXME: It works only on Unix.
-    let path = filename =~ '^/' ? filename : cont.basedir . '/' . filename
+    let path = filename =~ '^\%(/\|\a\+:[/\\]\)' ? filename : cont.basedir . '/' . filename
 
     let tag = {
     \   'word':    name,
