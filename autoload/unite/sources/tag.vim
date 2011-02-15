@@ -1,5 +1,5 @@
 " tag source for unite.vim
-" Version:     0.0.4
+" Version:     0.1.0
 " Last Change: 15 Feb 2011
 " Author:      tsukkee <takayuki0510 at gmail.com>
 "              thinca <thinca+vim@gmail.com>
