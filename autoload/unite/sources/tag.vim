@@ -41,13 +41,13 @@ let s:source = {
 \}
 
 function! s:source.hooks.on_init(args, context)
-    let s:last_tagfiles = tagfiles()
+    let a:context.source__tagfiles = tagfiles()
 endfunction
 
 function! s:source.gather_candidates(args, context)
     let a:context.source__continuation = []
     let result = []
-    for tagfile in s:last_tagfiles
+    for tagfile in a:context.source__tagfiles
         let tags = s:get_tags(tagfile)
         if empty(tags)
             continue
@@ -104,7 +104,7 @@ let s:source_files = {
 function! s:source_files.gather_candidates(args, context)
     let a:context.source__continuation = []
     let files = {}
-    for tagfile in s:last_tagfiles
+    for tagfile in a:context.source__tagfiles
         let tags = s:get_tags(tagfile)
         if empty(tags)
             continue
