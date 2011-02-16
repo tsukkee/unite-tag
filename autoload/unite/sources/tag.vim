@@ -184,7 +184,7 @@ function! s:next(tags, line, is_file)
     \                  !empty(pattern) ? ' pat:/' . pattern . '/' : '',
     \                  !empty(linenr)  ? ' line:' . linenr : ''),
     \   'kind':    'jump_list',
-    \   'source':  'tags',
+    \   'source':  'tag',
     \   'action__path':    path,
     \   'action__line':    linenr,
     \   'action__pattern': pattern,
