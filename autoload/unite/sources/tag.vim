@@ -84,6 +84,8 @@ function! s:source.async_gather_candidates(args, context)
     endif
 
     if empty(tags.cont.lines)
+        call unite#print_message(
+        \      printf('tag: Caching of "%s" was completed.', tags.cont.tagfile))
         call remove(tags, 'cont')
         call remove(a:context.source__continuation, 0)
     endif
@@ -146,6 +148,7 @@ function! s:get_tags(tagfile)
         \     'lines': readfile(tagfile),
         \     'basedir': fnamemodify(tagfile, ':p:h'),
         \     'encoding': '',
+        \     'tagfile': tagfile,
         \   },
         \}
     endif
