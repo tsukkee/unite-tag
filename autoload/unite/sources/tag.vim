@@ -35,6 +35,7 @@ let s:cache = {}
 " source
 let s:source = {
 \   'name': 'tag',
+\   'description': 'candidates from tag file',
 \   'max_candidates': 30,
 \   'action_table': {},
 \   'hooks': {}
@@ -97,6 +98,7 @@ endfunction
 " source tag/file
 let s:source_files = {
 \   'name': 'tag/file',
+\   'description': 'candidates from files contained in tag file',
 \   'max_candidates': 30,
 \   'action_table': {},
 \   'hooks': {'on_init': s:source.hooks.on_init},
