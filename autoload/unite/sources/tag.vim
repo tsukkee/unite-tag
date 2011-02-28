@@ -86,7 +86,7 @@ function! s:source.async_gather_candidates(args, context)
 
     if empty(tags.cont.lines)
         call unite#print_message(
-        \      printf('tag: Caching of "%s" was completed.', tags.cont.tagfile))
+        \      printf('[tag] Caching of "%s" was completed.', tags.cont.tagfile))
         call remove(tags, 'cont')
         call remove(a:context.source__continuation, 0)
     endif
