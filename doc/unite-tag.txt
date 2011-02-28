@@ -1,7 +1,7 @@
 *unite-tag.txt* tag source for unite.vim
 
 Version:     0.1.0
-Last Change: 15 Feb 2011
+Last Change: 28 Feb 2011
 Author:      tsukkee <takayuki0510 at gmail.com>
              thinca <thinca+vim@gmail.com>
 Licence:     The MIT License
@@ -40,12 +40,12 @@ https://github.com/tsukkee/unite-tag
 ==============================================================================
 USAGE							*unite-tag-usage*
 
-To selecting tags, execute |:Unite| with argument of tag
+To select tags, execute |:Unite| with argument of tag
 >
 	:Unite tag
 <
 
-To selecting files including tags, execute |:Unite| with argument of tag/file
+To select files including tags, execute |:Unite| with argument of tag/file
 >
 	:Unite tag/file
 <
@@ -57,10 +57,13 @@ asynchronously.
 ==============================================================================
 CUSTOMIZE						*unite-tag-customize*
 
-If you want to unit-tag instead of |<C-]>|, try to write below in your vimrc.
-FIXME: this destroies |<C-]>| behaviour in help.
+If you want to unite-tag instead of |<C-]>|, try to write below in your vimrc.
+This allows you to use unite-tag only in normal buffers.
 >
-	nnoremap <C-]> :<C-u>UniteWithCursorWord -immediately tag<CR>
+    autocmd BufEnter *
+    \   if empty(&buftype)
+    \|      nnoremap <buffer> <C-]> :<C-u>UniteWithCursorWord -immediately tag<CR>
+    \|  endif
 <
 
 
