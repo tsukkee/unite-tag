@@ -84,11 +84,19 @@ function! s:source.async_gather_candidates(args, context)
         endwhile
     endif
 
+    call unite#clear_message()
+
     if empty(tags.cont.lines)
         call unite#print_message(
-        \      printf('[tag] Caching of "%s" was completed.', tags.cont.tagfile))
+        \      printf('[tag] Caching of "%s"...done.', tags.cont.tagfile))
         call remove(tags, 'cont')
         call remove(a:context.source__continuation, 0)
+    else
+        let len = tags.cont.lnum
+        let progress = (len - len(tags.cont.lines)) * 100 / len
+        call unite#print_message(
+        \    printf('[tag] Caching of "%s"...%d%%',
+        \           tags.cont.tagfile, progress))
     endif
 
     return s:pre_filter(result, a:args)
@@ -142,12 +150,14 @@ function! s:get_tags(tagfile)
         return {}
     endif
     if !has_key(s:cache, tagfile) || s:cache[tagfile].time != getftime(tagfile)
+        let lines = readfile(tagfile)
         let s:cache[tagfile] = {
         \   'time': getftime(tagfile),
         \   'tags': [],
         \   'files': {},
         \   'cont': {
-        \     'lines': readfile(tagfile),
+        \     'lines': lines,
+        \     'lnum': len(lines),
         \     'basedir': fnamemodify(tagfile, ':p:h'),
         \     'encoding': '',
         \     'tagfile': tagfile,
