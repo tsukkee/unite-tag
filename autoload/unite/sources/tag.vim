@@ -199,7 +199,6 @@ function! s:next(tags, line, is_file)
     \                  !empty(pattern) ? ' pat:/' . pattern . '/' : '',
     \                  !empty(linenr)  ? ' line:' . linenr : ''),
     \   'kind':    'jump_list',
-    \   'source':  'tag',
     \   'action__path':    path,
     \   'action__line':    linenr,
     \   'action__pattern': pattern,
@@ -215,7 +214,6 @@ function! s:next(tags, line, is_file)
         \   "word": fullpath,
         \   "abbr": fnamemodify(fullpath, ":."),
         \   "kind": "file",
-        \   "source": "tag/file",
         \   "action__path": fullpath,
         \   "action__directory": unite#path2directory(fullpath),
         \ }
