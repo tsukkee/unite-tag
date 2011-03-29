@@ -43,9 +43,9 @@ let s:source = {
 \}
 
 function! s:source.hooks.on_syntax(args, context)
-  syntax match uniteSource__Tag_File /\s\+\zs@.\{-}\ze\s\+\%(pat:\|line:\|\s*$\)/ containedin=uniteSource__Tag contained
-  syntax match uniteSource__Tag_Pat /\s\+\zspat:.\{-}\ze\s*$/ containedin=uniteSource__Tag contained
-  syntax match uniteSource__Tag_Line /\s\+\zsline:.\{-}\ze\s*$/ containedin=uniteSource__Tag contained
+  syntax match uniteSource__Tag_File /  @.\{-}  /ms=s+2,me=e-2 containedin=uniteSource__Tag contained nextgroup=uniteSource__Tag_Pat,uniteSource__Tag_Line skipwhite
+  syntax match uniteSource__Tag_Pat /pat:.\{-}\ze\s*$/ contained
+  syntax match uniteSource__Tag_Line /line:.\{-}\ze\s*$/ contained
   highlight default link uniteSource__Tag_File Type
   highlight default link uniteSource__Tag_Pat Special
   highlight default link uniteSource__Tag_Line Constant
@@ -203,7 +203,7 @@ function! s:next(tags, line, is_file)
 
     let tag = {
     \   'word':    name,
-    \   'abbr':    printf('%s @%s %s%s',
+    \   'abbr':    printf('%s  @%s %s%s',
     \                  name,
     \                  fnamemodify(path, ':.'),
     \                  !empty(pattern) ? ' pat:/' . pattern . '/' : '',
