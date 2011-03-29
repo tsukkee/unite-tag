@@ -38,8 +38,18 @@ let s:source = {
 \   'description': 'candidates from tag file',
 \   'max_candidates': 30,
 \   'action_table': {},
-\   'hooks': {}
+\   'hooks': {},
+\   'syntax': 'uniteSource__Tag',
 \}
+
+function! s:source.hooks.on_syntax(args, context)
+  syntax match uniteSource__Tag_File /\s\+\zs@.\{-}\ze\s\+\%(pat:\|line:\|\s*$\)/ containedin=uniteSource__Tag contained
+  syntax match uniteSource__Tag_Pat /\s\+\zspat:.\{-}\ze\s*$/ containedin=uniteSource__Tag contained
+  syntax match uniteSource__Tag_Line /\s\+\zsline:.\{-}\ze\s*$/ containedin=uniteSource__Tag contained
+  highlight default link uniteSource__Tag_File Type
+  highlight default link uniteSource__Tag_Pat Special
+  highlight default link uniteSource__Tag_Line Constant
+endfunction
 
 function! s:source.hooks.on_init(args, context)
     let a:context.source__tagfiles = tagfiles()
