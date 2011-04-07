@@ -274,12 +274,12 @@ function! s:parse_tag_line(line)
     let file = remove(fields, 0)
     let cmd = join(fields, "\t")
 
-    " remove /^ at the head and $/ at the end
-    let pattern = substitute(substitute(cmd, '^\/\^\?', '', ''), '\$\?\/$', '', '')
+    " remove / or ? at the head and the end
+    let pattern = matchstr(cmd, '^\([/?]\)\?\zs.*\ze\1$')
     " unescape /
     let pattern = substitute(pattern, '\\\/', '/', 'g')
     " escape regexp characters
-    let pattern = substitute(pattern, '[\[\]$*^~\/]', '\\\0', 'g')
+    let pattern = substitute(pattern, '[\[\]*~.]', '\\\0', 'g')
 
     " 4. TODO
 
