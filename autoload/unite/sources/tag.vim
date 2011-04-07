@@ -185,7 +185,7 @@ endfunction
 function! s:next(tags, line, is_file)
     let cont = a:tags.cont
     " parsing tag files is faster than using taglist()
-    let [name, filename, pattern, extensions] = s:parse_tag_line(
+    let [name, filename, cmd, extensions] = s:parse_tag_line(
     \    cont.encoding != '' ? iconv(a:line, cont.encoding, &encoding)
     \                        : a:line)
 
@@ -197,28 +197,37 @@ function! s:next(tags, line, is_file)
         return []
     endif
 
-    " when pattern shows line number
-    let linenr = ""
-    if pattern =~ '^\d\+$'
-        let linenr = pattern
-        let pattern = ''
+    " when cmd shows line number
+    let linenr = 0
+    if cmd =~ '^\d\+$'
+        let linenr = cmd - 0
+    else
+        " remove / or ? at the head and the end
+        let pattern = matchstr(cmd, '^\([/?]\)\?\zs.*\ze\1$')
+        " unescape /
+        let pattern = substitute(pattern, '\\\/', '/', 'g')
+        " use 'nomagic'
+        let pattern = '\M' . pattern
     endif
 
     let path = filename =~ '^\%(/\|\a\+:[/\\]\)' ? filename : cont.basedir . '/' . filename
 
     let tag = {
     \   'word':    name,
-    \   'abbr':    printf('%s  @%s %s%s',
+    \   'abbr':    printf('%s  @%s  %s',
     \                  name,
     \                  fnamemodify(path, ':.'),
-    \                  !empty(pattern) ? ' pat:/' . pattern . '/' : '',
-    \                  !empty(linenr)  ? ' line:' . linenr : ''),
+    \                  linenr ? 'line:' . linenr : 'pat:' . cmd
+    \                  ),
     \   'kind':    'jump_list',
     \   'action__path':    path,
-    \   'action__line':    linenr,
-    \   'action__pattern': pattern,
     \   'action__tagname': name
     \}
+    if linenr
+        let tag.action__line = linenr
+    else
+        let tag.action__pattern = pattern
+    endif
     call add(a:tags.tags, tag)
 
     let result = a:is_file ? [] : [tag]
@@ -274,16 +283,9 @@ function! s:parse_tag_line(line)
     let file = remove(fields, 0)
     let cmd = join(fields, "\t")
 
-    " remove / or ? at the head and the end
-    let pattern = matchstr(cmd, '^\([/?]\)\?\zs.*\ze\1$')
-    " unescape /
-    let pattern = substitute(pattern, '\\\/', '/', 'g')
-    " escape regexp characters
-    let pattern = substitute(pattern, '[\[\]*~.]', '\\\0', 'g')
-
     " 4. TODO
 
-    return [name, file, pattern, extensions]
+    return [name, file, cmd, extensions]
 endfunction
 " " test case
 " let s:test = 'Hoge	test.php	/^function Hoge()\/*$\/;"	f	test:*\/ {$/;"	f'
