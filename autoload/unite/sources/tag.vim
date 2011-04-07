@@ -80,7 +80,11 @@ function! s:source.async_gather_candidates(args, context)
     let tags = a:context.source__continuation[0]
 
     let is_file = self.name ==# 'tag/file'
-    if has('reltime') && has('float')
+    if a:context.immediately
+        while !empty(tags.cont.lines)
+            let result += s:next(tags, remove(tags.cont.lines, 0), is_file)
+        endwhile
+    elseif has('reltime') && has('float')
         let time = reltime()
         while str2float(reltimestr(reltime(time))) < 0.05
         \       && !empty(tags.cont.lines)
