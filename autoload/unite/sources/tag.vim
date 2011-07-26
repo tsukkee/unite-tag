@@ -149,11 +149,13 @@ endfunction
 function! s:pre_filter(result, args)
     if !empty(a:args)
         let arg = a:args[0]
-        if arg == '/'
-            let pat = arg[1 : ]
-            call filter(a:result, 'v:val.word =~? pat')
-        else
-            call filter(a:result, 'v:val.word == arg')
+        if arg !=# ''
+            if arg ==# '/'
+                let pat = arg[1 : ]
+                call filter(a:result, 'v:val.word =~? pat')
+            else
+                call filter(a:result, 'v:val.word == arg')
+            endif
         endif
     endif
     return a:result
