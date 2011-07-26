@@ -105,7 +105,7 @@ function! s:source.async_gather_candidates(args, context)
         \      printf('[tag] Caching of "%s"...done.', tagdata.cont.tagfile))
         call remove(tagdata, 'cont')
         call remove(a:context.source__continuation, 0)
-        let a:context.is_async = 0
+        let a:context.is_async = !empty(a:context.source__continuation)
     else
         let len = tagdata.cont.lnum
         let progress = (len - len(tagdata.cont.lines)) * 100 / len
