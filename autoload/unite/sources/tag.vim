@@ -59,13 +59,13 @@ function! s:source.gather_candidates(args, context)
     let a:context.source__continuation = []
     let result = []
     for tagfile in a:context.source__tagfiles
-        let tags = s:get_tags(tagfile)
-        if empty(tags)
+        let tagdata = s:get_tagdata(tagfile)
+        if empty(tagdata)
             continue
         endif
-        let result += tags.tags
-        if has_key(tags, 'cont')
-            call add(a:context.source__continuation, tags)
+        let result += tagdata.tags
+        if has_key(tagdata, 'cont')
+            call add(a:context.source__continuation, tagdata)
         endif
     endfor
 
@@ -77,41 +77,41 @@ function! s:source.async_gather_candidates(args, context)
         return []
     endif
     let result = []
-    let tags = a:context.source__continuation[0]
+    let tagdata = a:context.source__continuation[0]
 
     let is_file = self.name ==# 'tag/file'
     if a:context.immediately
-        while !empty(tags.cont.lines)
-            let result += s:next(tags, remove(tags.cont.lines, 0), is_file)
+        while !empty(tagdata.cont.lines)
+            let result += s:next(tagdata, remove(tagdata.cont.lines, 0), is_file)
         endwhile
     elseif has('reltime') && has('float')
         let time = reltime()
         while str2float(reltimestr(reltime(time))) < 0.05
-        \       && !empty(tags.cont.lines)
-            let result += s:next(tags, remove(tags.cont.lines, 0), is_file)
+        \       && !empty(tagdata.cont.lines)
+            let result += s:next(tagdata, remove(tagdata.cont.lines, 0), is_file)
         endwhile
     else
         let i = 100
-        while 0 < i && !empty(tags.cont.lines)
-            let result += s:next(tags, remove(tags.cont.lines, 0), is_file)
+        while 0 < i && !empty(tagdata.cont.lines)
+            let result += s:next(tagdata, remove(tagdata.cont.lines, 0), is_file)
             let i -= 1
         endwhile
     endif
 
     call unite#clear_message()
 
-    if empty(tags.cont.lines)
+    if empty(tagdata.cont.lines)
         call unite#print_message(
-        \      printf('[tag] Caching of "%s"...done.', tags.cont.tagfile))
-        call remove(tags, 'cont')
+        \      printf('[tag] Caching of "%s"...done.', tagdata.cont.tagfile))
+        call remove(tagdata, 'cont')
         call remove(a:context.source__continuation, 0)
         let a:context.is_async = 0
     else
-        let len = tags.cont.lnum
-        let progress = (len - len(tags.cont.lines)) * 100 / len
+        let len = tagdata.cont.lnum
+        let progress = (len - len(tagdata.cont.lines)) * 100 / len
         call unite#print_message(
         \    printf('[tag] Caching of "%s"...%d%%',
-        \           tags.cont.tagfile, progress))
+        \           tagdata.cont.tagfile, progress))
     endif
 
     return s:pre_filter(result, a:args)
@@ -132,13 +132,13 @@ function! s:source_files.gather_candidates(args, context)
     let a:context.source__continuation = []
     let files = {}
     for tagfile in a:context.source__tagfiles
-        let tags = s:get_tags(tagfile)
-        if empty(tags)
+        let tagdata = s:get_tagdata(tagfile)
+        if empty(tagdata)
             continue
         endif
-        call extend(files, tags.files)
-        if has_key(tags, 'cont')
-            call add(a:context.source__continuation, tags)
+        call extend(files, tagdata.files)
+        if has_key(tagdata, 'cont')
+            call add(a:context.source__continuation, tagdata)
         endif
     endfor
 
@@ -159,7 +159,7 @@ function! s:pre_filter(result, args)
     return a:result
 endfunction
 
-function! s:get_tags(tagfile)
+function! s:get_tagdata(tagfile)
     let tagfile = fnamemodify(a:tagfile, ':p')
     if !filereadable(tagfile)
         return {}
@@ -182,8 +182,8 @@ function! s:get_tags(tagfile)
     return s:cache[tagfile]
 endfunction
 
-function! s:next(tags, line, is_file)
-    let cont = a:tags.cont
+function! s:next(tagdata, line, is_file)
+    let cont = a:tagdata.cont
     " parsing tag files is faster than using taglist()
     let [name, filename, cmd, extensions] = s:parse_tag_line(
     \    cont.encoding != '' ? iconv(a:line, cont.encoding, &encoding)
@@ -228,12 +228,12 @@ function! s:next(tags, line, is_file)
     else
         let tag.action__pattern = pattern
     endif
-    call add(a:tags.tags, tag)
+    call add(a:tagdata.tags, tag)
 
     let result = a:is_file ? [] : [tag]
 
     let fullpath = fnamemodify(path, ':p')
-    if !has_key(a:tags.files, fullpath)
+    if !has_key(a:tagdata.files, fullpath)
         let file = {
         \   "word": fullpath,
         \   "abbr": fnamemodify(fullpath, ":."),
@@ -241,7 +241,7 @@ function! s:next(tags, line, is_file)
         \   "action__path": fullpath,
         \   "action__directory": unite#path2directory(fullpath),
         \ }
-        let a:tags.files[fullpath] = file
+        let a:tagdata.files[fullpath] = file
         if a:is_file
             let result = [file]
         endif
