@@ -3,6 +3,7 @@
 " Last Change: 28 Feb 2011
 " Author:      tsukkee <takayuki0510 at gmail.com>
 "              thinca <thinca+vim@gmail.com>
+"              Shougo <ShougoMatsu at gmail.com>
 " Licence:     The MIT License {{{
 "     Permission is hereby granted, free of charge, to any person obtaining a copy
 "     of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +26,7 @@
 
 " define source
 function! unite#sources#tag#define()
-    return [s:source, s:source_files]
+    return [s:source, s:source_files, s:source_include]
 endfunction
 
 
@@ -53,6 +54,7 @@ endfunction
 
 function! s:source.hooks.on_init(args, context)
     let a:context.source__tagfiles = tagfiles()
+    let a:context.source__name = 'tag'
 endfunction
 
 function! s:source.gather_candidates(args, context)
@@ -69,13 +71,20 @@ function! s:source.gather_candidates(args, context)
         endif
     endfor
 
+    let a:context.source__cont_number = 1
+    let a:context.source__cont_max = len(a:context.source__continuation)
+
     return s:pre_filter(result, a:args)
 endfunction
 
 function! s:source.async_gather_candidates(args, context)
     if empty(a:context.source__continuation)
+        let a:context.is_async = 0
+        call unite#print_message(
+        \    printf('[%s] Caching Done!', a:context.source__name))
         return []
     endif
+
     let result = []
     let tagdata = a:context.source__continuation[0]
 
@@ -100,18 +109,18 @@ function! s:source.async_gather_candidates(args, context)
 
     call unite#clear_message()
 
+    let len = tagdata.cont.lnum
+    let progress = (len - len(tagdata.cont.lines)) * 100 / len
+    call unite#print_message(
+                \    printf('[%s] [%2d/%2d] Caching of "%s"...%d%%',
+                \           a:context.source__name,
+                \           a:context.source__cont_number, a:context.source__cont_max,
+                \           tagdata.cont.tagfile, progress))
+
     if empty(tagdata.cont.lines)
-        call unite#print_message(
-        \      printf('[tag] Caching of "%s"...done.', tagdata.cont.tagfile))
         call remove(tagdata, 'cont')
         call remove(a:context.source__continuation, 0)
-        let a:context.is_async = !empty(a:context.source__continuation)
-    else
-        let len = tagdata.cont.lnum
-        let progress = (len - len(tagdata.cont.lines)) * 100 / len
-        call unite#print_message(
-        \    printf('[tag] Caching of "%s"...%d%%',
-        \           tagdata.cont.tagfile, progress))
+        let a:context.source__cont_number += 1
     endif
 
     return s:pre_filter(result, a:args)
@@ -142,7 +151,55 @@ function! s:source_files.gather_candidates(args, context)
         endif
     endfor
 
+    let a:context.source__cont_number = 1
+    let a:context.source__cont_max = len(a:context.source__continuation)
+
     return map(sort(keys(files)), 'files[v:val]')
+endfunction
+
+
+" source tag/include
+let s:source_include = {
+\   'name': 'tag/include',
+\   'description': 'candidates from files contained in include tag file',
+\   'max_candidates': 30,
+\   'action_table': {},
+\   'hooks': {'on_init': s:source.hooks.on_init},
+\   'async_gather_candidates': s:source.async_gather_candidates,
+\}
+
+function! s:source_include.hooks.on_init(args, context)
+    let a:context.source__tagfiles =
+          \ exists('*neocomplcache#sources#include_complete#get_include_files') ?
+          \ filter(map(
+          \ copy(neocomplcache#sources#include_complete#get_include_files(bufnr('%'))),
+          \ "neocomplcache#cache#encode_name('tags_output', v:val)"), 'filereadable(v:val)') : []
+    let a:context.source__name = 'tag/include'
+endfunction
+
+function! s:source_include.gather_candidates(args, context)
+    if empty(a:context.source__tagfiles)
+        call unite#print_message(
+        \    printf('[%s] Nothing include files.', a:context.source__name))
+    endif
+
+    let a:context.source__continuation = []
+    let result = []
+    for tagfile in a:context.source__tagfiles
+        let tagdata = s:get_tagdata(tagfile)
+        if empty(tagdata)
+            continue
+        endif
+        let result += tagdata.tags
+        if has_key(tagdata, 'cont')
+            call add(a:context.source__continuation, tagdata)
+        endif
+    endfor
+
+    let a:context.source__cont_number = 1
+    let a:context.source__cont_max = len(a:context.source__continuation)
+
+    return s:pre_filter(result, a:args)
 endfunction
 
 
@@ -324,3 +381,5 @@ function! s:action_table.jsplit.func(candidates)
 endfunction
 
 let s:source.action_table.jump_list = s:action_table
+
+" vim:foldmethod=marker:fen:sw=4:sts=4
