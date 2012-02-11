@@ -311,6 +311,7 @@ endfunction
 
 
 " Tag file format
+"   tag_name<TAB>file_name<TAB>ex_cmd
 "   tag_name<TAB>file_name<TAB>ex_cmd;"<TAB>extension_fields
 " Parse
 " 0. a line starting with ! is comment line
@@ -328,8 +329,13 @@ function! s:parse_tag_line(line)
 
     " 1.
     let tokens = split(a:line, ';"')
-    let former = join(tokens[0:-2], ';"')
-    let extensions = split(tokens[-1], "\t")
+	if len(tokens) > 1
+		let former = join(tokens[0:-2], ';"')
+		let extensions = split(tokens[-1], "\t")
+	else
+		let former = a:line
+		let extensions  = []
+	endif
 
     " 2.
     let fields = split(former, "\t")
