@@ -1,5 +1,5 @@
 " tag source for unite.vim
-" Version:     0.1.0
+" Version:     0.2.0
 " Last Change: 03 Jun 2012
 " Author:      tsukkee <takayuki0510 at gmail.com>
 "              thinca <thinca+vim@gmail.com>
@@ -400,7 +400,6 @@ function s:read_cache(filename)
         let ftime = getftime(a:filename)
 
         if ftime == data[0]
-            echomsg 'unite-tag read from cache'
             sandbox let s:cache[a:filename] = eval(data[1])
         endif
     endif
