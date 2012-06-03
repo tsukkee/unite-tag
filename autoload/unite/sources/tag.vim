@@ -1,6 +1,6 @@
 " tag source for unite.vim
 " Version:     0.1.0
-" Last Change: 28 Feb 2011
+" Last Change: 03 Jun 2012
 " Author:      tsukkee <takayuki0510 at gmail.com>
 "              thinca <thinca+vim@gmail.com>
 "              Shougo <ShougoMatsu at gmail.com>
@@ -32,6 +32,12 @@ endfunction
 
 " cache
 let s:cache = {}
+
+" cache directory
+let s:cache_dir = g:unite_data_directory . 'tag'
+if !isdirectory(s:cache_dir)
+    call mkdir(s:cache_dir, 'p')
+endif
 
 " source
 let s:source = {
@@ -118,9 +124,13 @@ function! s:source.async_gather_candidates(args, context)
                 \           tagdata.cont.tagfile, progress))
 
     if empty(tagdata.cont.lines)
+        let tagfile = tagdata.cont.tagfile
+
         call remove(tagdata, 'cont')
         call remove(a:context.source__continuation, 0)
         let a:context.source__cont_number += 1
+
+        call s:write_cache(tagfile)
     endif
 
     return s:pre_filter(result, a:args)
@@ -223,6 +233,7 @@ function! s:get_tagdata(tagfile)
     if !filereadable(tagfile)
         return {}
     endif
+    call s:read_cache(tagfile)
     if !has_key(s:cache, tagfile) || s:cache[tagfile].time != getftime(tagfile)
         let lines = readfile(tagfile)
         let s:cache[tagfile] = {
@@ -358,6 +369,29 @@ endfunction
 " let s:test = 'Hoge	Hoge/Fuga.php	/^class Hoge$/;"	c	line:15'
 " echomsg string(s:parse_tag_line(s:test))
 
+" cache to file
+function s:filename_to_cachename(filename)
+    return s:cache_dir . '/' . substitute(a:filename, '[\/]', '+=', 'g')
+endfunction
+
+function s:write_cache(filename)
+    call writefile([getftime(a:filename), string(s:cache[a:filename])],
+    \   s:filename_to_cachename(a:filename))
+endfunction
+
+function s:read_cache(filename)
+    let cache_filename = s:filename_to_cachename(a:filename)
+
+    if filereadable(cache_filename)
+        let data = readfile(cache_filename)
+        let ftime = getftime(a:filename)
+
+        if ftime == data[0]
+            echomsg 'unite-tag read from cache'
+            sandbox let s:cache[a:filename] = eval(data[1])
+        endif
+    endif
+endfunction
 
 " action
 let s:action_table = {}
