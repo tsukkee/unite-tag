@@ -1,6 +1,6 @@
 " tag source for unite.vim
 " Version:     0.2.0
-" Last Change: 03 Jun 2012
+" Last Change: 15 Jul 2012
 " Author:      tsukkee <takayuki0510 at gmail.com>
 "              thinca <thinca+vim@gmail.com>
 "              Shougo <ShougoMatsu at gmail.com>
@@ -38,6 +38,10 @@ let s:cache_dir = g:unite_data_directory . 'tag'
 if !isdirectory(s:cache_dir)
     call mkdir(s:cache_dir, 'p')
 endif
+
+" use vital
+let V = vital#of('unite')
+let s:C = V.import('System.Cache')
 
 " source
 let s:source = {
@@ -388,20 +392,13 @@ function s:filename_to_cachename(filename)
 endfunction
 
 function s:write_cache(filename)
-    call writefile([getftime(a:filename), string(s:cache[a:filename])],
-    \   s:filename_to_cachename(a:filename))
+    call s:C.writefile(s:cache_dir, a:filename, [string(s:cache[a:filename])])
 endfunction
 
 function s:read_cache(filename)
-    let cache_filename = s:filename_to_cachename(a:filename)
-
-    if filereadable(cache_filename)
-        let data = readfile(cache_filename)
-        let ftime = getftime(a:filename)
-
-        if ftime == data[0]
-            sandbox let s:cache[a:filename] = eval(data[1])
-        endif
+    if !s:C.check_old_cache(s:cache_dir, a:filename)
+        let data = s:C.readfile(s:cache_dir, a:filename)
+        sandbox let s:cache[a:filename] = eval(data[0])
     endif
 endfunction
 
