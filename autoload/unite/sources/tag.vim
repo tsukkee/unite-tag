@@ -89,6 +89,9 @@ function! s:source.async_gather_candidates(args, context)
 
     let result = []
     let tagdata = a:context.source__continuation[0]
+    if !has_key(tagdata, 'cont')
+        return []
+    endif
 
     let is_file = self.name ==# 'tag/file'
     if a:context.immediately
