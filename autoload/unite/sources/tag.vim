@@ -44,7 +44,9 @@ let s:source = {
 \}
 
 function! s:source.hooks.on_syntax(args, context)
-  syntax match uniteSource__Tag_File /  @.\{-}  /ms=s+2,me=e-2 containedin=uniteSource__Tag contained nextgroup=uniteSource__Tag_Pat,uniteSource__Tag_Line skipwhite
+  syntax match uniteSource__Tag_File /  @.\{-}  /ms=s+2,me=e-2
+              \ containedin=uniteSource__Tag contained 
+              \ nextgroup=uniteSource__Tag_Pat,uniteSource__Tag_Line skipwhite
   syntax match uniteSource__Tag_Pat /pat:.\{-}\ze\s*$/ contained
   syntax match uniteSource__Tag_Line /line:.\{-}\ze\s*$/ contained
   highlight default link uniteSource__Tag_File Type
@@ -329,13 +331,13 @@ function! s:parse_tag_line(line)
 
     " 1.
     let tokens = split(a:line, ';"')
-	if len(tokens) > 1
-		let former = join(tokens[0:-2], ';"')
-		let extensions = split(tokens[-1], "\t")
-	else
-		let former = a:line
-		let extensions  = []
-	endif
+    if len(tokens) > 1
+        let former = join(tokens[0:-2], ';"')
+        let extensions = split(tokens[-1], "\t")
+    else
+        let former = a:line
+        let extensions  = []
+    endif
 
     " 2.
     let fields = split(former, "\t")
