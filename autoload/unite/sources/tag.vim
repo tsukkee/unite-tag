@@ -100,12 +100,12 @@ function! s:source.async_gather_candidates(args, context)
         endwhile
     elseif has('reltime') && has('float')
         let time = reltime()
-        while str2float(reltimestr(reltime(time))) < 0.05
+        while str2float(reltimestr(reltime(time))) < 1.0
         \       && !empty(tagdata.cont.lines)
             let result += s:next(tagdata, remove(tagdata.cont.lines, 0), is_file)
         endwhile
     else
-        let i = 100
+        let i = 1000
         while 0 < i && !empty(tagdata.cont.lines)
             let result += s:next(tagdata, remove(tagdata.cont.lines, 0), is_file)
             let i -= 1
