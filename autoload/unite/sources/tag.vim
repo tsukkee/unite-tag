@@ -262,10 +262,12 @@ function! s:taglist_filter(input)
     \   'word':    v:val.name,
     \   'abbr':    printf('%s  @%s  %s',
     \                  v:val.name,
-    \                  fnamemodify(v:val.filename, ':.'),
+    \                  unite#util#substitute_path_separator(
+    \                        fnamemodify(v:val.filename, ':.')),
     \                  'pat:' . v:val.cmd),
     \   'kind':    'jump_list',
-    \   'action__path':    v:val.filename,
+    \   'action__path':    unite#util#substitute_path_separator(
+    \                   v:val.filename),
     \   'action__tagname': v:val.name,
     \   'source__cmd': v:val.cmd,
     \}")
