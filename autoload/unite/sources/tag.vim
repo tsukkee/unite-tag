@@ -1,6 +1,6 @@
 " tag source for unite.vim
 " Version:     0.1.0
-" Last Change: 25 Jul 2013.
+" Last Change: 23 Sep 2013.
 " Author:      tsukkee <takayuki0510 at gmail.com>
 "              thinca <thinca+vim@gmail.com>
 "              Shougo <ShougoMatsu at gmail.com>
@@ -179,11 +179,19 @@ let s:source_include = {
 \}
 
 function! s:source_include.hooks.on_init(args, context)
-    let a:context.source__tagfiles =
-          \ exists('*neocomplcache#sources#include_complete#get_include_files') ?
-          \ filter(map(
-          \ copy(neocomplcache#sources#include_complete#get_include_files(bufnr('%'))),
-          \ "neocomplcache#cache#encode_name('tags_output', v:val)"), 'filereadable(v:val)') : []
+    if exists('*neocomplete#sources#include#get_include_files')
+        let a:context.source__tagfiles = filter(map(
+                    \ copy(neocomplete#sources#include#get_include_files(bufnr('%'))),
+                    \ "neocomplete#cache#encode_name('tags_output', v:val)"),
+                    \ 'filereadable(v:val)')
+    elseif exists('*neocomplcache#sources#include_complete#get_include_files')
+        let a:context.source__tagfiles = filter(map(
+                    \ copy(neocomplcache#sources#include_complete#get_include_files(bufnr('%'))),
+                    \ "neocomplcache#cache#encode_name('tags_output', v:val)"),
+                    \ 'filereadable(v:val)')
+    else
+        let a:context.source__tagfiles = []
+    endif
     let a:context.source__name = 'tag/include'
 endfunction
 
