@@ -1,7 +1,7 @@
 *unite-tag.txt* tag source for unite.vim
 
 Version:     0.1.0
-Last Change: 28 Feb 2011
+Last Change: 29 Sep 2013
 Author:      tsukkee <takayuki0510 at gmail.com>
              thinca <thinca+vim@gmail.com>
 Licence:     The MIT License
@@ -32,8 +32,9 @@ including |tags|.
 
 Requirement:
 - |unite.vim| (Recommend latest version at https://github.com/Shougo/unite.vim)
-Note: Using tag/include source
+Note: Using tag/include source (Either one)
 - |neocomplcache|(Recommend latest version at https://github.com/Shougo/neocomplcache)
+- |neocomplete|(Recommend latest version at https://github.com/Shougo/neocomplete)
 
 Latest version:
 https://github.com/tsukkee/unite-tag
