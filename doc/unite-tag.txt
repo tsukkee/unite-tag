@@ -73,6 +73,13 @@ This allows you to use unite-tag only in normal buffers.
     \|  endif
 <
 
+==============================================================================
+FAQ							*unite-tag-faq*
+
+Q: I want to open files without generating tags files.
+
+A: You can use "tag/include" source. But it needs |neocomplcache| or
+|neocomplete| plugin. It uses automatically generated tag files.
 
 ==============================================================================
 vim:tw=78:fo=tcq2mM:ts=8:ft=help:norl
