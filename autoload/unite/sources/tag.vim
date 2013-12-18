@@ -1,6 +1,6 @@
 " tag source for unite.vim
 " Version:     0.1.0
-" Last Change: 23 Sep 2013.
+" Last Change: 19 Dec 2013.
 " Author:      tsukkee <takayuki0510 at gmail.com>
 "              thinca <thinca+vim@gmail.com>
 "              Shougo <ShougoMatsu at gmail.com>
@@ -38,7 +38,7 @@ let s:input_cache = {}
 let s:source = {
 \   'name': 'tag',
 \   'description': 'candidates from tag file',
-\   'max_candidates': 30,
+\   'max_candidates': 200,
 \   'action_table': {},
 \   'hooks': {},
 \   'syntax': 'uniteSource__Tag',
@@ -141,7 +141,6 @@ endfunction
 let s:source_files = {
 \   'name': 'tag/file',
 \   'description': 'candidates from files contained in tag file',
-\   'max_candidates': 30,
 \   'action_table': {},
 \   'hooks': {'on_init': s:source.hooks.on_init},
 \   'async_gather_candidates': s:source.async_gather_candidates,
