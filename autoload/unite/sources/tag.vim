@@ -179,6 +179,7 @@ let s:source_include = deepcopy(s:source)
 let s:source_include.name = 'tag/include'
 let s:source_include.description =
             \ 'candidates from files contained in include tag file'
+let s:source_include.max_candidates = 0
 
 function! s:source_include.hooks.on_init(args, context)
     if exists('*neocomplete#sources#include#get_include_files')
