@@ -98,21 +98,20 @@ function! s:source.async_gather_candidates(args, context)
         return []
     endif
 
-    let is_file = self.name ==# 'tag/file'
     if a:context.immediately
         while !empty(tagdata.cont.lines)
-            let result += s:next(tagdata, remove(tagdata.cont.lines, 0), is_file)
+            let result += s:next(tagdata, remove(tagdata.cont.lines, 0), self.name)
         endwhile
     elseif has('reltime') && has('float')
         let time = reltime()
         while str2float(reltimestr(reltime(time))) < 1.0
         \       && !empty(tagdata.cont.lines)
-            let result += s:next(tagdata, remove(tagdata.cont.lines, 0), is_file)
+            let result += s:next(tagdata, remove(tagdata.cont.lines, 0), self.name)
         endwhile
     else
         let i = 1000
         while 0 < i && !empty(tagdata.cont.lines)
-            let result += s:next(tagdata, remove(tagdata.cont.lines, 0), is_file)
+            let result += s:next(tagdata, remove(tagdata.cont.lines, 0), self.name)
             let i -= 1
         endwhile
     endif
@@ -298,7 +297,8 @@ function! s:taglist_filter(input)
     return taglist
 endfunction
 
-function! s:next(tagdata, line, is_file)
+function! s:next(tagdata, line, name)
+    let is_file = a:name ==# 'tag/file'
     let cont = a:tagdata.cont
     " parsing tag files is faster than using taglist()
     let [name, filename, cmd, extensions] = s:parse_tag_line(
@@ -332,7 +332,8 @@ function! s:next(tagdata, line, is_file)
     \   'word':    name,
     \   'abbr':    printf('%s  @%s  %s',
     \                  name,
-    \                  fnamemodify(path, ':.'),
+    \                  fnamemodify(path,
+    \                     (a:name ==# 'tag/include' ? ':t' : ':.')),
     \                  linenr ? 'line:' . linenr : 'pat:' . cmd
     \                  ),
     \   'kind':    'jump_list',
@@ -346,7 +347,7 @@ function! s:next(tagdata, line, is_file)
     endif
     call add(a:tagdata.tags, tag)
 
-    let result = a:is_file ? [] : [tag]
+    let result = is_file ? [] : [tag]
 
     let fullpath = fnamemodify(path, ':p')
     if !has_key(a:tagdata.files, fullpath)
@@ -358,7 +359,7 @@ function! s:next(tagdata, line, is_file)
         \   "action__directory": unite#path2directory(fullpath),
         \ }
         let a:tagdata.files[fullpath] = file
-        if a:is_file
+        if is_file
             let result = [file]
         endif
     endif
