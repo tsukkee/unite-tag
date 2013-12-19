@@ -1,6 +1,6 @@
 " tag source for unite.vim
 " Version:     0.1.0
-" Last Change: 19 Dec 2013.
+" Last Change: 20 Dec 2013.
 " Author:      tsukkee <takayuki0510 at gmail.com>
 "              thinca <thinca+vim@gmail.com>
 "              Shougo <ShougoMatsu at gmail.com>
@@ -340,10 +340,10 @@ function! s:next(tagdata, line, name)
 
     let tag = {
     \   'word':    name,
-    \   'abbr':    printf('%-20s  %-20s  %s',
-    \                  name,
-    \                  '@'.fnamemodify(path,
-    \                     (a:name ==# 'tag/include' ? ':t' : ':.')),
+    \   'abbr':    printf('%s  %s  %s',
+    \                  unite#util#truncate_smart(name, 25, 15, '..'),
+    \                  unite#util#truncate_smart('@'.fnamemodify(path,
+    \                     (a:name ==# 'tag/include' ? ':t' : ':.')), 20, 10, '..'),
     \                  linenr ? 'line:' . linenr : 'pat:' .
     \                      matchstr(cmd, '^[?/]\^\?\zs.\{-1,}\ze\$\?[?/]$')
     \                  ),
