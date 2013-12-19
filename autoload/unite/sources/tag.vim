@@ -271,11 +271,13 @@ function! s:taglist_filter(input)
 
     let taglist = map(taglist(a:input), "{
     \   'word':    v:val.name,
-    \   'abbr':    printf('%s  @%s  %s',
-    \                  v:val.name,
-    \                  unite#util#substitute_path_separator(
-    \                        fnamemodify(v:val.filename, ':.')),
-    \                  'pat:' . v:val.cmd),
+    \   'abbr':    printf('%s  %s  %s',
+    \                  unite#util#truncate_smart(v:val.name, 25, 15, '..'),
+    \                  unite#util#truncate_smart('@'.fnamemodify(
+    \                     v:val.filename, ':.'), 20, 10, '..'),
+    \                  'pat:' .  matchstr(v:val.cmd,
+    \                         '^[?/]\\^\\?\\zs.\\{-1,}\\ze\\$\\?[?/]$')
+    \                  ),
     \   'kind':    'jump_list',
     \   'action__path':    unite#util#substitute_path_separator(
     \                   v:val.filename),
