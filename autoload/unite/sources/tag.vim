@@ -53,6 +53,14 @@ function! s:source.hooks.on_syntax(args, context)
   highlight default link uniteSource__Tag_File Type
   highlight default link uniteSource__Tag_Pat Comment
   highlight default link uniteSource__Tag_Line Constant
+  if has('conceal')
+      syntax match uniteSource__Tag_Ignore /pat:/
+                  \ containedin=uniteSource__Tag_Pat conceal
+  else
+      syntax match uniteSource__Tag_Ignore /pat:/
+                  \ containedin=uniteSource__Tag_Pat
+      highlight default link uniteSource__Tag_Ignore Ignore
+  endif
 endfunction
 
 function! s:source.hooks.on_init(args, context)
