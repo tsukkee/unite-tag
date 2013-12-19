@@ -168,14 +168,10 @@ endfunction
 
 
 " source tag/include
-let s:source_include = {
-\   'name': 'tag/include',
-\   'description': 'candidates from files contained in include tag file',
-\   'max_candidates': 30,
-\   'action_table': {},
-\   'hooks': {'on_init': s:source.hooks.on_init},
-\   'async_gather_candidates': s:source.async_gather_candidates,
-\}
+let s:source_include = deepcopy(s:source)
+let s:source_include.name = 'tag/include'
+let s:source_include.description =
+            \ 'candidates from files contained in include tag file'
 
 function! s:source_include.hooks.on_init(args, context)
     if exists('*neocomplete#sources#include#get_include_files')
@@ -447,6 +443,7 @@ function! s:action_table.jsplit.func(candidates)
     endfor
 endfunction
 
-let s:source.action_table.jump_list = s:action_table
+let s:source.action_table = s:action_table
+let s:source_include.action_table = s:action_table
 
 " vim:foldmethod=marker:fen:sw=4:sts=4
