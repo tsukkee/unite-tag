@@ -326,7 +326,8 @@ function! s:next(tagdata, line, name)
         let pattern = '\M' . pattern
     endif
 
-    let path = filename =~ '^\%(/\|\a\+:[/\\]\)' ? filename : cont.basedir . '/' . filename
+    let path = filename =~ '^\%(/\|\a\+:[/\\]\)' ?
+                \ filename : cont.basedir . '/' . filename
 
     let tag = {
     \   'word':    name,
@@ -334,7 +335,8 @@ function! s:next(tagdata, line, name)
     \                  name,
     \                  '@'.fnamemodify(path,
     \                     (a:name ==# 'tag/include' ? ':t' : ':.')),
-    \                  linenr ? 'line:' . linenr : 'pat:' . cmd
+    \                  linenr ? 'line:' . linenr : 'pat:' .
+    \                      matchstr(cmd, '^[?/]\^\?\zs.\{-1,}\ze\$\?[?/]$')
     \                  ),
     \   'kind':    'jump_list',
     \   'action__path':    path,
