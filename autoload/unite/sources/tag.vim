@@ -51,7 +51,7 @@ function! s:source.hooks.on_syntax(args, context)
   syntax match uniteSource__Tag_Pat /pat:.\{-}\ze\s*$/ contained
   syntax match uniteSource__Tag_Line /line:.\{-}\ze\s*$/ contained
   highlight default link uniteSource__Tag_File Type
-  highlight default link uniteSource__Tag_Pat Special
+  highlight default link uniteSource__Tag_Pat Comment
   highlight default link uniteSource__Tag_Line Constant
 endfunction
 
@@ -330,9 +330,9 @@ function! s:next(tagdata, line, name)
 
     let tag = {
     \   'word':    name,
-    \   'abbr':    printf('%s  @%s  %s',
+    \   'abbr':    printf('%-20s  %-20s  %s',
     \                  name,
-    \                  fnamemodify(path,
+    \                  '@'.fnamemodify(path,
     \                     (a:name ==# 'tag/include' ? ':t' : ':.')),
     \                  linenr ? 'line:' . linenr : 'pat:' . cmd
     \                  ),
