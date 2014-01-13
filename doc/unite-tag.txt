@@ -1,4 +1,4 @@
-*unite-tag.txt* tag source for unite.vim
+*unite-tag.txt* tags source for unite.vim
 
 Version:     0.1.0
 Last Change: 29 Sep 2013
