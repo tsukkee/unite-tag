@@ -1,6 +1,6 @@
 " tag source for unite.vim
 " Version:     0.1.0
-" Last Change: 20 Dec 2013.
+" Last Change: 01-Feb-2014.
 " Author:      tsukkee <takayuki0510 at gmail.com>
 "              thinca <thinca+vim@gmail.com>
 "              Shougo <ShougoMatsu at gmail.com>
@@ -29,6 +29,10 @@ function! unite#sources#tag#define()
     return [s:source, s:source_files, s:source_include]
 endfunction
 
+let g:unite_source_tag_max_name_length =
+    \ get(g:, 'unite_source_tag_max_name_length', 25)
+let g:unite_source_tag_max_fname_length =
+    \ get(g:, 'unite_source_tag_max_fname_length', 20)
 
 " cache
 let s:tagfile_cache = {}
@@ -272,9 +276,11 @@ function! s:taglist_filter(input)
     let taglist = map(taglist(a:input), "{
     \   'word':    v:val.name,
     \   'abbr':    printf('%s  %s  %s',
-    \                  unite#util#truncate_smart(v:val.name, 25, 15, '..'),
+    \                  unite#util#truncate_smart(v:val.name,
+    \                     g:unite_source_tag_max_name_length, 15, '..'),
     \                  unite#util#truncate_smart('@'.fnamemodify(
-    \                     v:val.filename, ':.'), 20, 10, '..'),
+    \                     v:val.filename, ':.'),
+    \                     g:unite_source_tag_max_fname_length, 10, '..'),
     \                  'pat:' .  matchstr(v:val.cmd,
     \                         '^[?/]\\^\\?\\zs.\\{-1,}\\ze\\$\\?[?/]$')
     \                  ),
@@ -343,9 +349,11 @@ function! s:next(tagdata, line, name)
     let tag = {
     \   'word':    name,
     \   'abbr':    printf('%s  %s  %s',
-    \                  unite#util#truncate_smart(name, 25, 15, '..'),
+    \                  unite#util#truncate_smart(name,
+    \                      g:unite_source_tag_max_name_length, 15, '..'),
     \                  unite#util#truncate_smart('@'.fnamemodify(path,
-    \                     (a:name ==# 'tag/include' ? ':t' : ':.')), 20, 10, '..'),
+    \                     (a:name ==# 'tag/include' ? ':t' : ':.')),
+    \                     g:unite_source_tag_max_fname_length, 10, '..'),
     \                  linenr ? 'line:' . linenr : 'pat:' .
     \                      matchstr(cmd, '^[?/]\^\?\zs.\{-1,}\ze\$\?[?/]$')
     \                  ),
