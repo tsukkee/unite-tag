@@ -1,6 +1,6 @@
 " tag source for unite.vim
 " Version:     0.1.0
-" Last Change: 17 Mar 2014.
+" Last Change: 01-Feb-2014.
 " Author:      tsukkee <takayuki0510 at gmail.com>
 "              thinca <thinca+vim@gmail.com>
 "              Shougo <ShougoMatsu at gmail.com>
@@ -109,30 +109,42 @@ function! s:source.async_gather_candidates(args, context)
     if !has_key(tagdata, 'cont')
         return []
     endif
+
+    if a:context.immediately
+        while !empty(tagdata.cont.lines)
+            let result += s:next(tagdata, remove(tagdata.cont.lines, 0), self.name)
+        endwhile
+    elseif has('reltime') && has('float')
         let time = reltime()
         while str2float(reltimestr(reltime(time))) < 1.0
         \       && !empty(tagdata.cont.lines)
             let result += s:next(tagdata, remove(tagdata.cont.lines, 0), self.name)
         endwhile
-    return []
-    "
-    " call unite#clear_message()
-    "
-    " let len = tagdata.cont.lnum
-    " let progress = (len - len(tagdata.cont.lines)) * 100 / len
-    " call unite#print_message(
-    "             \    printf('[%s] [%2d/%2d] Caching of "%s"...%d%%',
-    "             \           a:context.source__name,
-    "             \           a:context.source__cont_number, a:context.source__cont_max,
-    "             \           tagdata.cont.tagfile, progress))
-    "
-    " if empty(tagdata.cont.lines)
-    "     call remove(tagdata, 'cont')
-    "     call remove(a:context.source__continuation, 0)
-    "     let a:context.source__cont_number += 1
-    " endif
-    "
-    " return s:pre_filter(result, a:args)
+    else
+        let i = 1000
+        while 0 < i && !empty(tagdata.cont.lines)
+            let result += s:next(tagdata, remove(tagdata.cont.lines, 0), self.name)
+            let i -= 1
+        endwhile
+    endif
+
+    call unite#clear_message()
+
+    let len = tagdata.cont.lnum
+    let progress = (len - len(tagdata.cont.lines)) * 100 / len
+    call unite#print_message(
+                \    printf('[%s] [%2d/%2d] Caching of "%s"...%d%%',
+                \           a:context.source__name,
+                \           a:context.source__cont_number, a:context.source__cont_max,
+                \           tagdata.cont.tagfile, progress))
+
+    if empty(tagdata.cont.lines)
+        call remove(tagdata, 'cont')
+        call remove(a:context.source__continuation, 0)
+        let a:context.source__cont_number += 1
+    endif
+
+    return s:pre_filter(result, a:args)
 endfunction
 
 
@@ -365,7 +377,7 @@ function! s:next(tagdata, line, name)
         \   "abbr": fnamemodify(fullpath, ":."),
         \   "kind": "file",
         \   "action__path": fullpath,
-        \   "action__directory": unite#util#path2directory(fullpath),
+        \   "action__directory": unite#path2directory(fullpath),
         \ }
         let a:tagdata.files[fullpath] = file
         if is_file
