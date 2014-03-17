@@ -1,6 +1,6 @@
 " tag source for unite.vim
 " Version:     0.1.0
-" Last Change: 01-Feb-2014.
+" Last Change: 17 Mar 2014.
 " Author:      tsukkee <takayuki0510 at gmail.com>
 "              thinca <thinca+vim@gmail.com>
 "              Shougo <ShougoMatsu at gmail.com>
@@ -377,7 +377,7 @@ function! s:next(tagdata, line, name)
         \   "abbr": fnamemodify(fullpath, ":."),
         \   "kind": "file",
         \   "action__path": fullpath,
-        \   "action__directory": unite#path2directory(fullpath),
+        \   "action__directory": unite#util#path2directory(fullpath),
         \ }
         let a:tagdata.files[fullpath] = file
         if is_file
