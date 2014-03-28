@@ -1,6 +1,6 @@
 " tag source for unite.vim
 " Version:     0.1.0
-" Last Change: 17 Mar 2014.
+" Last Change: 29 Mar 2014.
 " Author:      tsukkee <takayuki0510 at gmail.com>
 "              thinca <thinca+vim@gmail.com>
 "              Shougo <ShougoMatsu at gmail.com>
@@ -375,7 +375,7 @@ function! s:next(tagdata, line, name)
         let file = {
         \   "word": fullpath,
         \   "abbr": fnamemodify(fullpath, ":."),
-        \   "kind": "file",
+        \   "kind": "jump_list",
         \   "action__path": fullpath,
         \   "action__directory": unite#util#path2directory(fullpath),
         \ }
