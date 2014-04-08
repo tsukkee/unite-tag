@@ -34,6 +34,10 @@ let g:unite_source_tag_max_name_length =
 let g:unite_source_tag_max_fname_length =
     \ get(g:, 'unite_source_tag_max_fname_length', 20)
 
+" When enabled, use multi-byte aware string truncate method
+let g:unite_source_tag_strict_truncate_string =
+    \ get(g:, 'unite_source_tag_strict_truncate_string', 0)
+
 " cache
 let s:tagfile_cache = {}
 let s:input_cache = {}
@@ -276,9 +280,9 @@ function! s:taglist_filter(input)
     let taglist = map(taglist(a:input), "{
     \   'word':    v:val.name,
     \   'abbr':    printf('%s  %s  %s',
-    \                  unite#util#truncate_smart(v:val.name,
+    \                  s:truncate(v:val.name,
     \                     g:unite_source_tag_max_name_length, 15, '..'),
-    \                  unite#util#truncate_smart('@'.fnamemodify(
+    \                  s:truncate('@'.fnamemodify(
     \                     v:val.filename, ':.'),
     \                     g:unite_source_tag_max_fname_length, 10, '..'),
     \                  'pat:' .  matchstr(v:val.cmd,
@@ -312,6 +316,19 @@ function! s:taglist_filter(input)
 
     let s:input_cache[key] = taglist
     return taglist
+endfunction
+
+function! s:truncate(str, max, footer_width, sep)
+    if g:unite_source_tag_strict_truncate_string
+        return unite#util#truncate_smart(a:str, a:max, a:footer_width, a:sep)
+    else
+        let l = len(a:str)
+        if l <= a:max
+            return a:str . repeat(' ', a:max - l)
+        else
+            return a:str[0:(l-a:footer_width-len(a:sep))].a:sep.a:str[-a:footer_width:-1]
+        endif
+    endif
 endfunction
 
 function! s:next(tagdata, line, name)
@@ -353,9 +370,9 @@ function! s:next(tagdata, line, name)
     let tag = {
     \   'word':    name,
     \   'abbr':    printf('%s  %s  %s',
-    \                  unite#util#truncate_smart(name,
+    \                  s:truncate(name,
     \                      g:unite_source_tag_max_name_length, 15, '..'),
-    \                  unite#util#truncate_smart('@'.fnamemodify(path,
+    \                  s:truncate('@'.fnamemodify(path,
     \                     (a:name ==# 'tag/include' ? ':t' : ':.')),
     \                     g:unite_source_tag_max_fname_length, 10, '..'),
     \                  linenr ? 'line:' . linenr : 'pat:' .
