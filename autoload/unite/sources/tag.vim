@@ -318,7 +318,7 @@ function! s:next(tagdata, line, name)
     let is_file = a:name ==# 'tag/file'
     let cont = a:tagdata.cont
     " parsing tag files is faster than using taglist()
-    let [name, filename, cmd, extensions] = s:parse_tag_line(
+    let [name, filename, cmd] = s:parse_tag_line(
     \    cont.encoding != '' ? iconv(a:line, cont.encoding, &encoding)
     \                        : a:line)
 
@@ -403,7 +403,7 @@ function! s:parse_tag_line(line)
     " 0.
     if a:line[0] == '!'
         let enc = matchstr(a:line, '\C^!_TAG_FILE_ENCODING\t\zs\S\+\ze\t')
-        return ['', enc, '', []]
+        return ['', enc, '']
     endif
 
     " 1.
@@ -411,19 +411,16 @@ function! s:parse_tag_line(line)
     let tokens_len = len(tokens)
     if tokens_len > 2
         let former = join(tokens[0:-2], ';"')
-        let extensions = split(tokens[-1], "\t")
     elseif tokens_len == 2
         let former = tokens[0]
-        let extensions = split(tokens[1], "\t")
     else
         let former = a:line
-        let extensions  = []
     endif
 
     " 2.
     let fields = split(former, "\t")
     if len(fields) < 3
-        return ['', '', '', []]
+        return ['', '', '']
     endif
 
     " 3.
@@ -433,7 +430,7 @@ function! s:parse_tag_line(line)
 
     " 4. TODO
 
-    return [name, file, cmd, extensions]
+    return [name, file, cmd]
 endfunction
 " " test case
 " let s:test = 'Hoge	test.php	/^function Hoge()\/*$\/;"	f	test:*\/ {$/;"	f'
