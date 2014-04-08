@@ -1,6 +1,6 @@
 " tag source for unite.vim
 " Version:     0.1.0
-" Last Change: 29 Mar 2014.
+" Last Change: 09-Apr-2014.
 " Author:      tsukkee <takayuki0510 at gmail.com>
 "              thinca <thinca+vim@gmail.com>
 "              Shougo <ShougoMatsu at gmail.com>
@@ -401,16 +401,20 @@ endfunction
 " 4. parsing extension_fields
 function! s:parse_tag_line(line)
     " 0.
-    if stridx(a:line, '!') == 0
+    if a:line[0] == '!'
         let enc = matchstr(a:line, '\C^!_TAG_FILE_ENCODING\t\zs\S\+\ze\t')
         return ['', enc, '', []]
     endif
 
     " 1.
     let tokens = split(a:line, ';"')
-    if len(tokens) > 1
+    let tokens_len = len(tokens)
+    if tokens_len > 2
         let former = join(tokens[0:-2], ';"')
         let extensions = split(tokens[-1], "\t")
+    elseif tokens_len == 2
+        let former = tokens[0]
+        let extensions = split(tokens[1], "\t")
     else
         let former = a:line
         let extensions  = []
@@ -423,9 +427,9 @@ function! s:parse_tag_line(line)
     endif
 
     " 3.
-    let name = remove(fields, 0)
-    let file = remove(fields, 0)
-    let cmd = join(fields, "\t")
+    let name = fields[0]
+    let file = fields[1]
+    let cmd = len(fields) == 3 ? fields[2] : join(fields[2:-1], "\t")
 
     " 4. TODO
 
