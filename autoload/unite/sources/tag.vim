@@ -336,7 +336,11 @@ function! s:next(tagdata, line, name)
         let linenr = cmd - 0
     else
         " remove / or ? at the head and the end
-        let pattern = matchstr(cmd, '^\([/?]\)\?\zs.*\ze\1$')
+        if cmd =~ '^[/?]'
+            let pattern = cmd[1:-2]
+        else
+            let pattern = cmd
+        endif
         " unescape /
         let pattern = substitute(pattern, '\\\/', '/', 'g')
         " use 'nomagic'
