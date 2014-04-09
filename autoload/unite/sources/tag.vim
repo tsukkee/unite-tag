@@ -41,6 +41,9 @@ let g:unite_source_tag_strict_truncate_string =
 let g:unite_source_tag_show_location =
     \ get(g:, 'unite_source_tag_show_location', 0)
 
+let g:unite_source_tag_show_fname =
+    \ get(g:, 'unite_source_tag_show_fname', 0)
+
 " cache
 let s:tagfile_cache = {}
 let s:input_cache = {}
@@ -371,10 +374,12 @@ function! s:next(tagdata, line, name)
                 \ filename : cont.basedir . '/' . filename
 
     let abbr = s:truncate(name, g:unite_source_tag_max_name_length, 15, '..')
-    let abbr .= '  '.
-                \ s:truncate('@'.fnamemodify(path,
-                \   (a:name ==# 'tag/include' ? ':t' : ':.')),
-                \   g:unite_source_tag_max_fname_length, 10, '..')
+    if g:unite_source_tag_show_fname
+        let abbr .= '  '.
+                    \ s:truncate('@'.fnamemodify(path,
+                    \   (a:name ==# 'tag/include' ? ':t' : ':.')),
+                    \   g:unite_source_tag_max_fname_length, 10, '..')
+    endif
     if g:unite_source_tag_show_location
         if linenr
             let abbr .= '  line:' . linenr
