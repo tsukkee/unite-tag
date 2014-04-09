@@ -38,6 +38,9 @@ let g:unite_source_tag_max_fname_length =
 let g:unite_source_tag_strict_truncate_string =
     \ get(g:, 'unite_source_tag_strict_truncate_string', 0)
 
+let g:unite_source_tag_show_location =
+    \ get(g:, 'unite_source_tag_show_location', 0)
+
 " cache
 let s:tagfile_cache = {}
 let s:input_cache = {}
@@ -367,17 +370,22 @@ function! s:next(tagdata, line, name)
     let path = filename =~ '^\%(/\|\a\+:[/\\]\)' ?
                 \ filename : cont.basedir . '/' . filename
 
+    let abbr = s:truncate(name, g:unite_source_tag_max_name_length, 15, '..')
+    let abbr .= '  '.
+                \ s:truncate('@'.fnamemodify(path,
+                \   (a:name ==# 'tag/include' ? ':t' : ':.')),
+                \   g:unite_source_tag_max_fname_length, 10, '..')
+    if g:unite_source_tag_show_location
+        if linenr
+            let abbr .= '  line:' . linenr
+        else
+            let abbr .= '  ' . matchstr(cmd, '^[?/]\^\?\zs.\{-1,}\ze\$\?[?/]$'))
+        endif
+    endif
+
     let tag = {
     \   'word':    name,
-    \   'abbr':    printf('%s  %s  %s',
-    \                  s:truncate(name,
-    \                      g:unite_source_tag_max_name_length, 15, '..'),
-    \                  s:truncate('@'.fnamemodify(path,
-    \                     (a:name ==# 'tag/include' ? ':t' : ':.')),
-    \                     g:unite_source_tag_max_fname_length, 10, '..'),
-    \                  linenr ? 'line:' . linenr : 'pat:' .
-    \                      matchstr(cmd, '^[?/]\^\?\zs.\{-1,}\ze\$\?[?/]$')
-    \                  ),
+    \   'abbr':    abbr,
     \   'kind':    'jump_list',
     \   'action__path':    path,
     \   'action__tagname': name
