@@ -384,7 +384,7 @@ function! s:next(tagdata, line, name)
         if linenr
             let abbr .= '  line:' . linenr
         else
-            let abbr .= '  ' . matchstr(cmd, '^[?/]\^\?\zs.\{-1,}\ze\$\?[?/]$'))
+            let abbr .= '  ' . matchstr(cmd, '^[?/]\^\?\zs.\{-1,}\ze\$\?[?/]$')
         endif
     endif
 
