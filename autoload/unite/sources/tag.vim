@@ -36,13 +36,13 @@ let g:unite_source_tag_max_fname_length =
 
 " When enabled, use multi-byte aware string truncate method
 let g:unite_source_tag_strict_truncate_string =
-    \ get(g:, 'unite_source_tag_strict_truncate_string', 0)
+    \ get(g:, 'unite_source_tag_strict_truncate_string', 1)
 
 let g:unite_source_tag_show_location =
-    \ get(g:, 'unite_source_tag_show_location', 0)
+    \ get(g:, 'unite_source_tag_show_location', 1)
 
 let g:unite_source_tag_show_fname =
-    \ get(g:, 'unite_source_tag_show_fname', 0)
+    \ get(g:, 'unite_source_tag_show_fname', 1)
 
 " cache
 let s:tagfile_cache = {}
