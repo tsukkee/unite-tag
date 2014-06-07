@@ -72,6 +72,33 @@ This allows you to use unite-tag only in normal buffers.
     \|      nnoremap <buffer> <C-]> :<C-u>UniteWithCursorWord -immediately tag<CR>
     \|  endif
 <
+------------------------------------------------------------------------------
+VARIABLES 						*unite-tag-variables*
+
+g:unite_source_tag_max_name_length	*g:unite_source_tag_max_name_length*
+	Max length of tag name field in candidate.
+	The default value is 25.
+
+g:unite_source_tag_max_fname_length	*g:unite_source_tag_max_fname_length*
+	Max length of file name field in candidate.
+	The default value is 20.
+
+
+				*g:unite_source_tag_strict_truncate_string*
+g:unite_source_tag_strict_truncate_string
+	Use multi-byte aware string truncate method(precise, but slower).
+	The default value is 1.
+
+
+g:unite_source_tag_show_location	*g:unite_source_tag_show_location*
+	Show source location field.
+	The default value is 1.
+
+
+g:unite_source_tag_show_fname		*g:unite_source_tag_show_fname*
+	Show file name field.
+	The default value is 1.
+
 
 ==============================================================================
 FAQ							*unite-tag-faq*
