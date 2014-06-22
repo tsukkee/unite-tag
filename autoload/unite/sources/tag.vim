@@ -332,7 +332,8 @@ function! s:truncate(str, max, footer_width, sep)
         if l <= a:max
             return a:str . repeat(' ', a:max - l)
         else
-            return a:str[0:(l-a:footer_width-len(a:sep))].a:sep.a:str[-a:footer_width:-1]
+            return a:str[0 : (l - a:footer_width-len(a:sep))]
+                        \ .a:sep.a:str[-a:footer_width : -1]
         endif
     endif
 endfunction
