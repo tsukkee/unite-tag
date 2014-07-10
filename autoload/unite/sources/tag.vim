@@ -372,7 +372,9 @@ function! s:next(tagdata, line, name)
     endif
 
     let path = filename =~ '^\%(/\|\a\+:[/\\]\)' ?
-                \ filename : cont.basedir . '/' . filename
+                \ filename :
+                \ unite#util#substitute_path_separator(
+                \   fnamemodify(cont.basedir . '/' . filename, ':p:.'))
 
     let abbr = s:truncate(name, g:unite_source_tag_max_name_length, 15, '..')
     if g:unite_source_tag_show_fname
