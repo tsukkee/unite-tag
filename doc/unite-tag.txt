@@ -1,9 +1,9 @@
 *unite-tag.txt* tags source for unite.vim
 
-Version:     0.1.0
-Last Change: 29 Sep 2013
+Version:     0.2.0
 Author:      tsukkee <takayuki0510 at gmail.com>
              thinca <thinca+vim@gmail.com>
+             Shougo <ShougoMatsu at gmail.com>
 Licence:     The MIT License
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -57,20 +57,28 @@ Note: |neocomplcache| or |neocomplete| is needed.
 >
 	:Unite tag/include
 <
-This plugin does not block vim because tags' information are aggregated
+Also, you can filster result using parameter.
+>
+	:Unite tag:text
+<
+
+This plugin does not block vim because tags' information is aggregated
 asynchronously.
+
 
 
 ==============================================================================
 CUSTOMIZE						*unite-tag-customize*
 
 If you want to unite-tag instead of |<C-]>|, try to write below in your vimrc.
-This allows you to use unite-tag only in normal buffers.
+This allows you to use unite-tag only in normal buffers. But, if the tag
+files are too large, this mapping blocks vim for a while, because unite-tag
+aggregates tags' information synchronously when -immediately is set.
 >
-    autocmd BufEnter *
-    \   if empty(&buftype)
-    \|      nnoremap <buffer> <C-]> :<C-u>UniteWithCursorWord -immediately tag<CR>
-    \|  endif
+	autocmd BufEnter *
+	\   if empty(&buftype)
+	\|      nnoremap <buffer> <C-]> :<C-u>UniteWithCursorWord -immediately tag<CR>
+	\|  endif
 <
 ------------------------------------------------------------------------------
 VARIABLES 						*unite-tag-variables*
