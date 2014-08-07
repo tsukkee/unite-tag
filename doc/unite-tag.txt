@@ -57,7 +57,7 @@ Note: |neocomplcache| or |neocomplete| is needed.
 >
 	:Unite tag/include
 <
-Also, you can filster result using parameter.
+Also, you can filter result using parameter.
 >
 	:Unite tag:text
 <
