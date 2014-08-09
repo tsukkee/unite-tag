@@ -48,7 +48,7 @@ let s:tagfile_cache = {}
 let s:input_cache = {}
 
 " cache directory
-let s:cache_dir = unite#get_data_directory() . 'tag'
+let s:cache_dir = unite#get_data_directory() . '/tag'
 if !isdirectory(s:cache_dir)
     call mkdir(s:cache_dir, 'p')
 endif
