@@ -270,7 +270,7 @@ function! s:pre_filter(result, args)
             endif
         endif
     endif
-    return a:result
+    return unite#util#uniq_by(a:result, 'v:val.abbr')
 endfunction
 
 function! s:get_tagdata(tagfile)
@@ -327,6 +327,9 @@ function! s:taglist_filter(input)
     \   'action__tagname': v:val.name,
     \   'source__cmd': v:val.cmd,
     \}")
+
+    " Uniq
+    let taglist = s:pre_filter(taglist, {})
 
     " Set search pattern.
     for tag in taglist
