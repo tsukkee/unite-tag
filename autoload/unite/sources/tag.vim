@@ -43,6 +43,9 @@ let g:unite_source_tag_show_location =
 let g:unite_source_tag_show_fname =
     \ get(g:, 'unite_source_tag_show_fname', 1)
 
+let g:unite_source_tag_relative_fname =
+    \ get(g:, 'unite_source_tag_relative_fname', 1)
+
 " cache
 let s:tagfile_cache = {}
 let s:input_cache = {}
@@ -408,10 +411,13 @@ function! s:next(tagdata, line, name)
 
     let abbr = s:truncate(name, g:unite_source_tag_max_name_length, 15, '..')
     if g:unite_source_tag_show_fname
-        let abbr .= '  '.
-                    \ s:truncate('@'.
-                    \   (a:name ==# 'tag/include' ? fnamemodify(path, ':t') : filename),
-                    \   g:unite_source_tag_max_fname_length, 10, '..')
+        let abbr .= '  '
+        let abbr .= s:truncate('@'.
+                    \  fnamemodify(path, (
+                    \   (a:name ==# 'tag/include'
+                    \    || !g:unite_source_tag_relative_fname) ?
+                    \    ':t' : ':~:.')),
+                    \  g:unite_source_tag_max_fname_length, 10, '..')
     endif
     if g:unite_source_tag_show_location
         if linenr

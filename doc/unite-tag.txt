@@ -108,6 +108,11 @@ g:unite_source_tag_show_fname		*g:unite_source_tag_show_fname*
 	The default value is 1.
 
 
+g:unite_source_tag_relative_fname	*g:unite_source_tag_relative_fname*
+	Use relative file name in the file name field.
+	The default value is 1.
+
+
 ==============================================================================
 FAQ							*unite-tag-faq*
 
