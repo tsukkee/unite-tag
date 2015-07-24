@@ -219,16 +219,8 @@ let s:source_include.description =
 let s:source_include.max_candidates = 0
 
 function! s:source_include.hooks.on_init(args, context)
-    if exists('*neocomplete#sources#include#get_include_files')
-        let a:context.source__tagfiles = filter(map(
-                    \ copy(neocomplete#sources#include#get_include_files(bufnr('%'))),
-                    \ "neocomplete#cache#encode_name('tags_output', v:val)"),
-                    \ 'filereadable(v:val)')
-    elseif exists('*neocomplcache#sources#include_complete#get_include_files')
-        let a:context.source__tagfiles = filter(map(
-                    \ copy(neocomplcache#sources#include_complete#get_include_files(bufnr('%'))),
-                    \ "neocomplcache#cache#encode_name('tags_output', v:val)"),
-                    \ 'filereadable(v:val)')
+    if exists('g:loaded_neoinclude')
+        let a:context.source__tagfiles = neoinclude#include#get_tag_files()
     else
         let a:context.source__tagfiles = []
     endif

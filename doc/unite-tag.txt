@@ -32,9 +32,9 @@ including |tags|.
 
 Requirement:
 - |unite.vim| (Recommend latest version at https://github.com/Shougo/unite.vim)
-Note: Using tag/include source (Either one)
-- |neocomplcache|(Recommend latest version at https://github.com/Shougo/neocomplcache)
-- |neocomplete|(Recommend latest version at https://github.com/Shougo/neocomplete)
+Note: Using tag/include source
+- |neoinclude| (Recommend latest version at
+  https://github.com/Shougo/neoinclude.vim)
 
 Latest version:
 https://github.com/tsukkee/unite-tag
@@ -53,7 +53,7 @@ To select files including tags, execute |:Unite| with argument of tag/file
 <
 To select include tags generated like |tagbar| or |ctrlp|, execute
 |:Unite| with argument of tag/include.
-Note: |neocomplcache| or |neocomplete| is needed.
+Note: |neoinclude| is needed.
 >
 	:Unite tag/include
 <
@@ -119,8 +119,8 @@ FAQ							*unite-tag-faq*
 Q: I want to open files without generating tags files like ctrlp.vim or
 tagbar plugin.
 
-A: You can use "tag/include" source. But it needs |neocomplcache| or
-|neocomplete| plugin. It uses automatically generated tag files.
+A: You can use "tag/include" source. But it needs |neoinclude| plugin. It uses
+automatically generated tag files.
 
 ==============================================================================
 vim:tw=78:fo=tcq2mM:ts=8:ft=help:norl
