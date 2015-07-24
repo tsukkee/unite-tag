@@ -219,7 +219,7 @@ let s:source_include.description =
 let s:source_include.max_candidates = 0
 
 function! s:source_include.hooks.on_init(args, context)
-    if exists('g:loaded_neoinclude')
+    if get(g:, 'loaded_neoinclude', 0)
         let a:context.source__tagfiles = neoinclude#include#get_tag_files()
     else
         let a:context.source__tagfiles = []
