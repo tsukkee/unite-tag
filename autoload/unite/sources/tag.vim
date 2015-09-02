@@ -518,29 +518,29 @@ function! s:parse_tag_line(line)
     return [name, file, cmd]
 endfunction
 " " test case
-" let s:test = 'Hoge	test.php	/^function Hoge()\/*$\/;"	f	test:*\/ {$/;"	f'
+" let s:test = 'Hoge	test.php	/^function! Hoge()\/*$\/;"	f	test:*\/ {$/;"	f'
 " echomsg string(s:parse_tag_line(s:test))
 " let s:test = 'Hoge	Hoge/Fuga.php	/^class Hoge$/;"	c	line:15'
 " echomsg string(s:parse_tag_line(s:test))
 
 " cache to file
-function s:filename_to_cachename(filename)
+function! s:filename_to_cachename(filename)
     return s:cache_dir . '/' . substitute(a:filename, '[\/]', '+=', 'g')
 endfunction
 
-function s:write_cache(filename)
+function! s:write_cache(filename)
     call s:C.writefile(s:cache_dir, a:filename,
                 \ [string(s:tagfile_cache[a:filename])])
 endfunction
 
-function s:read_cache(filename)
+function! s:read_cache(filename)
     if !s:C.check_old_cache(s:cache_dir, a:filename)
         let data = s:C.readfile(s:cache_dir, a:filename)
         sandbox let s:tagfile_cache[a:filename] = eval(data[0])
     endif
 endfunction
 
-function s:parse_option(line) abort
+function! s:parse_option(line) abort
     let option = {}
     let option.kind = ''
 
