@@ -98,13 +98,18 @@ g:unite_source_tag_strict_truncate_string
 	The default value is 1.
 
 
-g:unite_source_tag_show_location	*g:unite_source_tag_show_location*
-	Show source location field.
+g:unite_source_tag_show_fname		*g:unite_source_tag_show_fname*
+	Show file name field.
 	The default value is 1.
 
 
-g:unite_source_tag_show_fname		*g:unite_source_tag_show_fname*
-	Show file name field.
+g:unite_source_tag_show_kind		*g:unite_source_tag_show_kind*
+	Show kind field.
+	The default value is 1.
+
+
+g:unite_source_tag_show_location	*g:unite_source_tag_show_location*
+	Show source location field.
 	The default value is 1.
 
 

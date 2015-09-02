@@ -40,6 +40,9 @@ let g:unite_source_tag_strict_truncate_string =
 let g:unite_source_tag_show_fname =
     \ get(g:, 'unite_source_tag_show_fname', 1)
 
+let g:unite_source_tag_show_kind =
+    \ get(g:, 'unite_source_tag_show_kind', 1)
+
 let g:unite_source_tag_relative_fname =
     \ get(g:, 'unite_source_tag_relative_fname', 1)
 
@@ -73,12 +76,16 @@ let s:source = {
 function! s:source.hooks.on_syntax(args, context)
   syntax match uniteSource__Tag_File /  @.\{-}  /ms=s+2,me=e-2
               \ containedin=uniteSource__Tag contained
-              \ nextgroup=uniteSource__Tag_Pat,uniteSource__Tag_Line skipwhite
+              \ nextgroup=uniteSource__Tag_Kind,
+              \uniteSource__Tag_Pat,uniteSource__Tag_Line skipwhite
+  syntax match uniteSource__Tag_Kind /k:.  / contained
+              \ nextgroup=uniteSource__Tag_Pat,uniteSource__Tag_Line
   syntax match uniteSource__Tag_Pat /pat:.\{-}\ze\s*$/ contained
   syntax match uniteSource__Tag_Line /line:.\{-}\ze\s*$/ contained
-  highlight default link uniteSource__Tag_File Type
+  highlight default link uniteSource__Tag_File Constant
+  highlight default link uniteSource__Tag_Kind Type
   highlight default link uniteSource__Tag_Pat Comment
-  highlight default link uniteSource__Tag_Line Constant
+  highlight default link uniteSource__Tag_Line LineNr
   if has('conceal')
       syntax match uniteSource__Tag_Ignore /pat:/
                   \ containedin=uniteSource__Tag_Pat conceal
@@ -97,17 +104,18 @@ endfunction
 function! s:source.gather_candidates(args, context)
     let a:context.source__continuation = []
     if a:context.input != ''
-        return s:taglist_filter(a:context.input)
+        return s:taglist_filter(a:context.input, self.name)
     endif
 
     let result = []
     for tagfile in a:context.source__tagfiles
-        let tagdata = s:get_tagdata(tagfile)
+        let tagdata = s:get_tagdata(tagfile, a:context)
         if empty(tagdata)
             continue
         endif
         let result += tagdata.tags
         if has_key(tagdata, 'cont')
+            let a:context.is_async = 1
             call add(a:context.source__continuation, tagdata)
         endif
     endfor
@@ -194,7 +202,7 @@ function! s:source_files.gather_candidates(args, context)
     let a:context.source__continuation = []
     let files = {}
     for tagfile in a:context.source__tagfiles
-        let tagdata = s:get_tagdata(tagfile)
+        let tagdata = s:get_tagdata(tagfile, a:context)
         if empty(tagdata)
             continue
         endif
@@ -236,7 +244,7 @@ function! s:source_include.gather_candidates(args, context)
     let a:context.source__continuation = []
     let result = []
     for tagfile in a:context.source__tagfiles
-        let tagdata = s:get_tagdata(tagfile)
+        let tagdata = s:get_tagdata(tagfile, a:context)
         if empty(tagdata)
             continue
         endif
@@ -268,7 +276,7 @@ function! s:pre_filter(result, args)
     return unite#util#uniq_by(a:result, 'v:val.abbr')
 endfunction
 
-function! s:get_tagdata(tagfile)
+function! s:get_tagdata(tagfile, context)
     let tagfile = fnamemodify(a:tagfile, ':p')
     if !filereadable(tagfile)
         return {}
@@ -282,6 +290,7 @@ function! s:get_tagdata(tagfile)
     " - cache data is expired
     if !has_key(s:tagfile_cache, tagfile)
                 \ || s:tagfile_cache[tagfile].time != getftime(tagfile)
+                \ || a:context.is_redraw
         let lines = readfile(tagfile)
         let s:tagfile_cache[tagfile] = {
         \   'time': getftime(tagfile),
@@ -299,7 +308,7 @@ function! s:get_tagdata(tagfile)
     return s:tagfile_cache[tagfile]
 endfunction
 
-function! s:taglist_filter(input)
+function! s:taglist_filter(input, name)
     let key = string(tagfiles()).a:input
     if has_key(s:input_cache, key)
         return s:input_cache[key]
@@ -307,13 +316,17 @@ function! s:taglist_filter(input)
 
     let taglist = map(taglist(a:input), "{
     \   'word':    v:val.name,
-    \   'abbr':    printf('%s%s%s',
+    \   'abbr':    printf('%s%s%s%s',
     \                  s:truncate(v:val.name,
     \                     g:unite_source_tag_max_name_length, 15, '..'),
     \                  (!g:unite_source_tag_show_fname ? '' :
     \                    '  ' . s:truncate('@'.fnamemodify(
-    \                     v:val.filename, ':.'),
+    \                     v:val.filename, (a:name ==# 'tag/include'
+    \                          || !g:unite_source_tag_relative_fname ?
+    \                     ':t' : ':~:.')),
     \                     g:unite_source_tag_max_fname_length, 10, '..')),
+    \                  (!g:unite_source_tag_show_kind ? '' :
+    \                    '  k:' . v:val.kind),
     \                  (!g:unite_source_tag_show_location ? '' :
     \                    '  pat:' .  matchstr(v:val.cmd,
     \                         '^[?/]\\^\\?\\zs.\\{-1,}\\ze\\$\\?[?/]$'))
@@ -369,9 +382,9 @@ function! s:next(tagdata, line, name)
     let is_file = a:name ==# 'tag/file'
     let cont = a:tagdata.cont
     " parsing tag files is faster than using taglist()
-    let [name, filename, cmd] = s:parse_tag_line(
-    \    cont.encoding != '' ? iconv(a:line, cont.encoding, &encoding)
-    \                        : a:line)
+    let line = cont.encoding != '' ? iconv(a:line, cont.encoding, &encoding)
+    \                        : a:line
+    let [name, filename, cmd] = s:parse_tag_line(line)
 
     " check comment line
     if empty(name)
@@ -403,6 +416,8 @@ function! s:next(tagdata, line, name)
                 \ unite#util#substitute_path_separator(
                 \   fnamemodify(cont.basedir . '/' . filename, ':p:.'))
 
+    let option = s:parse_option(line)
+
     let abbr = s:truncate(name, g:unite_source_tag_max_name_length, 15, '..')
     if g:unite_source_tag_show_fname
         let abbr .= '  '
@@ -412,6 +427,9 @@ function! s:next(tagdata, line, name)
                     \    || !g:unite_source_tag_relative_fname) ?
                     \    ':t' : ':~:.')),
                     \  g:unite_source_tag_max_fname_length, 10, '..')
+    endif
+    if g:unite_source_tag_show_kind && option.kind != ''
+        let abbr .= '  k:' . option.kind
     endif
     if g:unite_source_tag_show_location
         if linenr
@@ -520,6 +538,22 @@ function s:read_cache(filename)
         let data = s:C.readfile(s:cache_dir, a:filename)
         sandbox let s:tagfile_cache[a:filename] = eval(data[0])
     endif
+endfunction
+
+function s:parse_option(line) abort
+    let option = {}
+    let option.kind = ''
+
+    for opt in split(a:line[len(matchstr(a:line, '.*/;"')):], '\t', 1)
+      let key = matchstr(opt, '^\h\w*\ze:')
+      if key == ''
+        let option.kind = opt
+      else
+        let option[key] = matchstr(opt, '^\h\w*:\zs.*')
+      endif
+    endfor
+
+    return option
 endfunction
 
 " action
