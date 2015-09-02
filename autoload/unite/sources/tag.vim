@@ -432,11 +432,9 @@ function! s:next(tagdata, line, name)
         let abbr .= '  k:' . option.kind
     endif
     if g:unite_source_tag_show_location
-        if linenr
-            let abbr .= '  line:' . linenr
-        else
-            let abbr .= '  ' . matchstr(cmd, '^[?/]\^\?\zs.\{-1,}\ze\$\?[?/]$')
-        endif
+        let abbr .= linenr ? '  line:' . linenr
+                    \      : '  pat:' .
+                    \        matchstr(cmd, '^[?/]\^\?\zs.\{-1,}\ze\$\?[?/]$')
     endif
 
     let tag = {
