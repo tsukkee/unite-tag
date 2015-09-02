@@ -37,14 +37,14 @@ let g:unite_source_tag_max_fname_length =
 let g:unite_source_tag_strict_truncate_string =
     \ get(g:, 'unite_source_tag_strict_truncate_string', 1)
 
-let g:unite_source_tag_show_location =
-    \ get(g:, 'unite_source_tag_show_location', 1)
-
 let g:unite_source_tag_show_fname =
     \ get(g:, 'unite_source_tag_show_fname', 1)
 
 let g:unite_source_tag_relative_fname =
     \ get(g:, 'unite_source_tag_relative_fname', 1)
+
+let g:unite_source_tag_show_location =
+    \ get(g:, 'unite_source_tag_show_location', 1)
 
 " cache
 let s:tagfile_cache = {}
@@ -307,14 +307,16 @@ function! s:taglist_filter(input)
 
     let taglist = map(taglist(a:input), "{
     \   'word':    v:val.name,
-    \   'abbr':    printf('%s  %s  %s',
+    \   'abbr':    printf('%s%s%s',
     \                  s:truncate(v:val.name,
     \                     g:unite_source_tag_max_name_length, 15, '..'),
-    \                  s:truncate('@'.fnamemodify(
+    \                  (!g:unite_source_tag_show_fname ? '' :
+    \                    '  ' . s:truncate('@'.fnamemodify(
     \                     v:val.filename, ':.'),
-    \                     g:unite_source_tag_max_fname_length, 10, '..'),
-    \                  'pat:' .  matchstr(v:val.cmd,
-    \                         '^[?/]\\^\\?\\zs.\\{-1,}\\ze\\$\\?[?/]$')
+    \                     g:unite_source_tag_max_fname_length, 10, '..')),
+    \                  (!g:unite_source_tag_show_location ? '' :
+    \                    '  pat:' .  matchstr(v:val.cmd,
+    \                         '^[?/]\\^\\?\\zs.\\{-1,}\\ze\\$\\?[?/]$'))
     \                  ),
     \   'kind':    'jump_list',
     \   'action__path':    unite#util#substitute_path_separator(
