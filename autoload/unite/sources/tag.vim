@@ -438,11 +438,11 @@ function! s:next(tagdata, line, name)
     let fullpath = fnamemodify(path, ':p')
     if !has_key(a:tagdata.files, fullpath)
         let file = {
-        \   "word": fullpath,
-        \   "abbr": fnamemodify(fullpath, ":."),
-        \   "kind": "jump_list",
-        \   "action__path": fullpath,
-        \   "action__directory": unite#util#path2directory(fullpath),
+        \   'word': fullpath,
+        \   'abbr': fnamemodify(fullpath, ':.'),
+        \   'kind': 'jump_list',
+        \   'action__path': fullpath,
+        \   'action__directory': unite#util#path2directory(fullpath),
         \ }
         let a:tagdata.files[fullpath] = file
         if is_file
