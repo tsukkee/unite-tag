@@ -78,7 +78,7 @@ function! s:source.hooks.on_syntax(args, context)
               \ containedin=uniteSource__Tag contained
               \ nextgroup=uniteSource__Tag_Kind,
               \uniteSource__Tag_Pat,uniteSource__Tag_Line skipwhite
-  syntax match uniteSource__Tag_Kind /k:.  / contained
+  syntax match uniteSource__Tag_Kind /k:\h\w*  / contained
               \ nextgroup=uniteSource__Tag_Pat,uniteSource__Tag_Line
   syntax match uniteSource__Tag_Pat /pat:.\{-}\ze\s*$/ contained
   syntax match uniteSource__Tag_Line /line:.\{-}\ze\s*$/ contained
@@ -326,7 +326,7 @@ function! s:taglist_filter(input, name)
     \                     ':t' : ':~:.')),
     \                     g:unite_source_tag_max_fname_length, 10, '..')),
     \                  (!g:unite_source_tag_show_kind ? '' :
-    \                    '  k:' . v:val.kind),
+    \                    '  k:' . s:truncate(v:val.kind, 10, 2, '..')),
     \                  (!g:unite_source_tag_show_location ? '' :
     \                    '  pat:' .  matchstr(v:val.cmd,
     \                         '^[?/]\\^\\?\\zs.\\{-1,}\\ze\\$\\?[?/]$'))
@@ -429,7 +429,7 @@ function! s:next(tagdata, line, name)
                     \  g:unite_source_tag_max_fname_length, 10, '..')
     endif
     if g:unite_source_tag_show_kind && option.kind != ''
-        let abbr .= '  k:' . option.kind
+        let abbr .= '  k:' . s:truncate(option.kind, 8, 2, '..')
     endif
     if g:unite_source_tag_show_location
         let abbr .= linenr ? '  line:' . linenr
