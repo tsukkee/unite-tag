@@ -78,7 +78,7 @@ function! s:source.hooks.on_syntax(args, context)
               \ containedin=uniteSource__Tag contained
               \ nextgroup=uniteSource__Tag_Kind,
               \uniteSource__Tag_Pat,uniteSource__Tag_Line skipwhite
-  syntax match uniteSource__Tag_Kind /k:\h\w*  / contained
+  syntax match uniteSource__Tag_Kind /k:\h\w*\s\+/ contained
               \ nextgroup=uniteSource__Tag_Pat,uniteSource__Tag_Line
   syntax match uniteSource__Tag_Pat /pat:.\{-}\ze\s*$/ contained
   syntax match uniteSource__Tag_Line /line:.\{-}\ze\s*$/ contained
