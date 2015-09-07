@@ -208,6 +208,7 @@ function! s:source_files.gather_candidates(args, context)
         endif
         call extend(files, tagdata.files)
         if has_key(tagdata, 'cont')
+            let a:context.is_async = 1
             call add(a:context.source__continuation, tagdata)
         endif
     endfor
@@ -250,6 +251,7 @@ function! s:source_include.gather_candidates(args, context)
         endif
         let result += tagdata.tags
         if has_key(tagdata, 'cont')
+            let a:context.is_async = 1
             call add(a:context.source__continuation, tagdata)
         endif
     endfor
