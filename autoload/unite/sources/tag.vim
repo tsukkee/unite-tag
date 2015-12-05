@@ -269,17 +269,23 @@ endfunction
 
 " filter defined by unite's parameter (e.g. Unite tag:filter)
 function! s:pre_filter(result, args)
-    if !empty(a:args)
-        let arg = a:args[0]
+    if !empty(a:args) | for arg in a:args
+        "let arg = a:args[0]
         if arg !=# ''
-            if arg =~# '/'
+            if arg ==# '%'
+            " Current buffer tags
+                let bufname = (&ft=='unite' ? expand('#:p') : expand('%:p'))
+                call filter(a:result, 'v:val.action__path == bufname')
+            " Pattern matching name
+            elseif arg =~# '/'
                 let pat = arg[1 : ]
                 call filter(a:result, 'v:val.word =~? pat')
+            " Normal matching name
             else
                 call filter(a:result, 'v:val.word == arg')
             endif
         endif
-    endif
+    endfor | endif
     return unite#util#uniq_by(a:result, 'v:val.abbr')
 endfunction
 
