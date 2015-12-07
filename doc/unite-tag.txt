@@ -61,7 +61,12 @@ Also, you can filter result using parameter.
 >
 	:Unite tag:text
 <
+Other filters: >
 
+        :Unite tag:%            " Current-buffer
+        :Unite tag:/pattern     " Filter with pattern
+
+<
 This plugin does not block vim because tags' information is aggregated
 asynchronously.
 
