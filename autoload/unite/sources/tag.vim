@@ -276,14 +276,14 @@ function! s:pre_filter(result, args)
                 if arg ==# '%'
                 " Current buffer tags
                     let bufname = (&ft==#'unite' ? bufname(b:unite.prev_bufnr) : expand('%:p'))
-                    call filter(a:result, 'v:val.action__path == bufname')
+                    call filter(a:result, 'v:val.action__path ==# bufname')
                 " Pattern matching name
                 elseif arg =~# '/'
                     let pat = arg[1 : ]
                     call filter(a:result, 'v:val.word =~? pat')
                 " Normal matching name
                 else
-                    call filter(a:result, 'v:val.word == arg')
+                    call filter(a:result, 'v:val.word ==# arg')
                 endif
             endif
         endfor
