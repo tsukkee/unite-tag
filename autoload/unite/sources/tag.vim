@@ -269,25 +269,28 @@ endfunction
 
 " filter defined by unite's parameter (e.g. Unite tag:filter)
 function! s:pre_filter(result, args)
-    if !empty(a:args)
-        for arg in a:args
-            "let arg = a:args[0]
-            if arg !=# ''
-                if arg ==# '%'
-                " Current buffer tags
-                    let bufname = (&ft==#'unite' ? bufname(b:unite.prev_bufnr) : expand('%:p'))
-                    call filter(a:result, 'v:val.action__path ==# bufname')
-                " Pattern matching name
-                elseif arg =~# '/'
-                    let pat = arg[1 : ]
-                    call filter(a:result, 'v:val.word =~? pat')
-                " Normal matching name
-                else
-                    call filter(a:result, 'v:val.word ==# arg')
-                endif
-            endif
-        endfor
+    if empty(a:args)
+        return unite#util#uniq_by(a:result, 'v:val.abbr')
     endif
+
+    for arg in a:args
+        if arg ==# ''
+            continue
+        endif
+        if arg ==# '%'
+            " Current buffer tags
+            let bufname = (&ft==#'unite' ?
+                        \ bufname(b:unite.prev_bufnr) : expand('%:p'))
+            call filter(a:result, 'v:val.action__path ==# bufname')
+        elseif arg =~# '/'
+            " Pattern matching name
+            let pat = arg[1 : ]
+            call filter(a:result, 'v:val.word =~? pat')
+        else
+            " Normal matching name
+            call filter(a:result, 'v:val.word ==# arg')
+        endif
+    endfor
     return unite#util#uniq_by(a:result, 'v:val.abbr')
 endfunction
 
@@ -349,7 +352,7 @@ function! s:taglist_filter(input, name)
     \                  ),
     \   'kind':    'jump_list',
     \   'action__path':    unite#util#substitute_path_separator(
-    \                   v:val.filename),
+    \                   fnamemodify(v:val.filename, ':p')),
     \   'action__tagname': v:val.name,
     \   'source__cmd': v:val.cmd,
     \}")
@@ -454,11 +457,13 @@ function! s:next(tagdata, line, name)
                     \        matchstr(cmd, '^[?/]\^\?\zs.\{-1,}\ze\$\?[?/]$')
     endif
 
+    let fullpath = unite#util#substitute_path_separator(
+                \ fnamemodify(path, ':p'))
     let tag = {
     \   'word':    name,
     \   'abbr':    abbr,
     \   'kind':    'jump_list',
-    \   'action__path':    path,
+    \   'action__path':    fullpath,
     \   'action__tagname': name
     \}
     if linenr
@@ -470,7 +475,6 @@ function! s:next(tagdata, line, name)
 
     let result = is_file ? [] : [tag]
 
-    let fullpath = fnamemodify(path, ':p')
     if !has_key(a:tagdata.files, fullpath)
         let file = {
         \   'word': fullpath,
