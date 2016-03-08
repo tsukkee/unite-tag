@@ -103,6 +103,16 @@ g:unite_source_tag_max_fname_length	*g:unite_source_tag_max_fname_length*
 	The default value is 20.
 
 
+g:unite_source_tag_name_footer_length	*g:unite_source_tag_name_footer_length*
+	Leave this many characters from the end of the tag's name.
+	The default value is 10.
+
+
+g:unite_source_tag_fname_footer_length	*g:unite_source_tag_fname_footer_length*
+	Leave this many characters from the end of the tag's file name.
+	The default value is 15.
+
+
 				*g:unite_source_tag_strict_truncate_string*
 g:unite_source_tag_strict_truncate_string
 	Use multi-byte aware string truncate method(precise, but slower).
