@@ -35,6 +35,11 @@ let g:unite_source_tag_max_kind_length =
 let g:unite_source_tag_max_fname_length =
     \ get(g:, 'unite_source_tag_max_fname_length', 20)
 
+let g:unite_source_tag_name_footer_length =
+    \ get(g:, 'unite_source_tag_name_footer_length', 10)
+let g:unite_source_tag_fname_footer_length =
+    \ get(g:, 'unite_source_tag_fname_footer_length', 15)
+
 " When enabled, use multi-byte aware string truncate method
 let g:unite_source_tag_strict_truncate_string =
     \ get(g:, 'unite_source_tag_strict_truncate_string', 1)
@@ -336,13 +341,15 @@ function! s:taglist_filter(input, name) abort
     \   'word':    v:val.name,
     \   'abbr':    printf('%s%s%s%s',
     \                  s:truncate(v:val.name,
-    \                     g:unite_source_tag_max_name_length, 15, '..'),
+    \                     g:unite_source_tag_max_name_length,
+    \                     g:unite_source_tag_name_footer_length, '..'),
     \                  (!g:unite_source_tag_show_fname ? '' :
     \                    '  ' . s:truncate('@'.fnamemodify(
     \                     v:val.filename, (a:name ==# 'tag/include'
     \                          || !g:unite_source_tag_relative_fname ?
     \                     ':t' : ':~:.')),
-    \                     g:unite_source_tag_max_fname_length, 10, '..')),
+    \                     g:unite_source_tag_max_fname_length,
+    \                     g:unite_source_tag_fname_footer_length, '..')),
     \                  (!g:unite_source_tag_show_kind ? '' :
     \                    '  k:' . s:truncate(v:val.kind,
     \                     g:unite_source_tag_max_kind_length, 2, '..')),
@@ -437,7 +444,8 @@ function! s:next(tagdata, line, name) abort
 
     let option = s:parse_option(line)
 
-    let abbr = s:truncate(name, g:unite_source_tag_max_name_length, 15, '..')
+    let abbr = s:truncate(name, g:unite_source_tag_max_name_length,
+                \ g:unite_source_tag_name_footer_length, '..')
     if g:unite_source_tag_show_fname
         let abbr .= '  '
         let abbr .= s:truncate('@'.
@@ -445,7 +453,8 @@ function! s:next(tagdata, line, name) abort
                     \   (a:name ==# 'tag/include'
                     \    || !g:unite_source_tag_relative_fname) ?
                     \    ':t' : ':~:.')),
-                    \  g:unite_source_tag_max_fname_length, 10, '..')
+                    \  g:unite_source_tag_max_fname_length,
+                    \  g:unite_source_tag_fname_footer_length, '..')
     endif
     if g:unite_source_tag_show_kind && option.kind != ''
         let abbr .= '  k:' . s:truncate(option.kind,
