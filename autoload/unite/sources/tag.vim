@@ -67,8 +67,7 @@ if !isdirectory(s:cache_dir)
 endif
 
 " use vital
-let s:V = vital#of('unite')
-let s:C = s:V.import('System.Cache')
+let s:C = unite#util#get_vital_cache()
 
 " source
 let s:source = {
